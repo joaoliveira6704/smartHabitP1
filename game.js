@@ -14,18 +14,18 @@ let totalCombined = totalCost + totalWaterCost;
 const rooms = [
   {
     name: "Wc Suite",
-    x: 1088,
-    y: 496,
+    x: 1104,
+    y: 504,
     width: 288,
-    height: 336,
+    height: 312,
     color: "red",
   },
   {
     name: "Wc",
-    x: 50,
-    y: 350,
-    width: 200,
-    height: 200,
+    x: 768,
+    y: 504,
+    width: 288,
+    height: 312,
     color: "#e3f2fd",
   },
 ];
@@ -408,7 +408,7 @@ function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Desenhar fundo (com offset da câmera)
-  if (backgroundImg.complete && backgroundImg.naturalWidth > 0) {
+  if (backgroundImg.complete) {
     ctx.drawImage(
       backgroundImg,
       camera.x,
@@ -420,10 +420,15 @@ function render() {
       camera.width,
       camera.height
     );
-    rooms.forEach((room) => {
-      ctx.fillStyle = "red";
-      ctx.fillRect(room.x, room.y, room.width, room.height);
-    });
+    /* rooms.forEach((room) => {
+      ctx.fillStyle = "rgb(255 0 0 / 50%)";
+      ctx.fillRect(
+        room.x - camera.x,
+        room.y - camera.y,
+        room.width,
+        room.height
+      );
+    }); */
   } else {
     ctx.fillStyle = "#ecf0f1";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
