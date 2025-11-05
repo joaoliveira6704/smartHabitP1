@@ -1,0 +1,205 @@
+@font-face {
+  font-family: "BlockBlueprint";
+  src: url("./fonts/BlockBlueprint.ttf"); /*URL to font*/
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "BlockBlueprint";
+  font-size: large;
+}
+
+body {
+  background: linear-gradient(135deg, green 0%, rgb(37, 79, 37) 100%);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.menu-container {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 60px 50px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  min-width: 400px;
+  animation: slideIn 0.6s ease-out;
+  transition: all 0.5s ease;
+}
+
+.menu-container.hide {
+  opacity: 0;
+  transform: scale(0.8) translateY(-50px);
+  pointer-events: none;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+h1 {
+  color: #667eea;
+  font-size: 2.5em;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  color: #666;
+  font-size: 1.1em;
+  margin-bottom: 40px;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.menu-btn {
+  padding: 18px 40px;
+  font-size: 1.2em;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: green;
+}
+
+.btn-play {
+  background: linear-gradient(135deg, green 0%, rgb(107, 180, 107) 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-play:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn-play:active {
+  transform: translateY(-1px);
+}
+
+.btn-options {
+  background: white;
+  color: green;
+  border: 2px solid green;
+}
+
+.btn-options:hover {
+  background: green;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.btn-credits {
+  background: white;
+  color: green;
+  border: 2px solid green;
+}
+
+.btn-credits:hover {
+  background: green;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.game-container {
+  display: none;
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.game-container.show {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.game-container h2 {
+  color: green;
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+.game-container p {
+  color: #666;
+  font-size: 1.2em;
+}
+
+canvas {
+  border: 3px solid #34495e;
+  background: #ecf0f1;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+#instructions {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+  border-left: 4px solid green;
+  text-align: left;
+}
+#instructions h4 {
+  color: green;
+  margin-bottom: 10px;
+}
+#instructions ul {
+  list-style-position: inside;
+  line-height: 1.8;
+}
+
+.panel {
+  background: white;
+  color: black;
+  border: 2px solid green;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.panel h3 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 8px;
+}
+.panel p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+#panel-wrapper {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}

@@ -4,393 +4,80 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sprite com Animação</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        background: #2c3e50;
-        font-family: Arial, sans-serif;
-      }
-
-      canvas {
-        border: 3px solid #34495e;
-        background: #ecf0f1;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-      }
-
-      .controls {
-        margin-top: 20px;
-        color: white;
-        text-align: center;
-        background: #34495e;
-        padding: 20px;
-        border-radius: 8px;
-        max-width: 600px;
-      }
-    </style>
+    <link rel="stylesheet" href="main.css" />
   </head>
   <body>
-    <canvas id="gameCanvas" width="600" height="400"></canvas>
-
-    <div class="controls">
-      <p style="font-size: 12px">
-        Use as setas ou WASD para mover o personagem
-      </p>
+    <div class="menu-container" id="menu">
+      <img src="logo.svg" alt="logo" srcset="" style="width: 40%" />
+      <div class="menu-buttons">
+        <button class="menu-btn btn-play" id="playBtn">Jogar</button>
+        <button class="menu-btn btn-credits">Instruções</button>
+        <button class="menu-btn btn-options">Objetivos</button>
+      </div>
     </div>
 
-    <script>
-      const canvas = document.getElementById("gameCanvas");
-      const ctx = canvas.getContext("2d");
+    <div class="game-container" id="game">
+      <canvas id="gameCanvas" width="600" height="400"></canvas>
+      <div id="instructions" style="display: none">
+        <h4>📖 Como Jogar</h4>
+        <ul>
+          <li><strong> Mover:</strong> WASD</li>
+          <li>
+            <strong>Interagir:</strong> Pressionar E próximo a dispositivos
+            (luzes, água, eletrodomésticos)
+          </li>
+          <li>
+            <strong>Gestos:</strong> Ativar a câmara e levante a mão para
+            ligar/desligar dispositivos
+          </li>
+          <li>
+            <strong>Objetivo:</strong> Explorar a casa e observar o consumo
+            energético de diferentes dispositivos
+          </li>
+          <li>
+            <strong>Sensor:</strong> O quarto possui sensor de presença que
+            liga/desliga automaticamente
+          </li>
+        </ul>
+      </div>
 
-      // Mapa de colisão
-      const TILE_SIZE = 48;
-      let collisionMap = [];
-      let mapWidth = 0;
-      let mapHeight = 0;
-      let mapPixelWidth = 0;
-      let mapPixelHeight = 0;
+      <div id="panel-wrapper">
+        <div class="panel">
+          <h3>⚡ Consumo Energético</h3>
+          <div class="stat">
+            <span>Consumo Atual:</span>
+            <span class="stat-value" id="consumption">0 W</span>
+          </div>
+          <div class="stat">
+            <span>Custo/Hora:</span>
+            <span class="stat-value" id="cost">0.00 €</span>
+          </div>
+          <div class="stat">
+            <span>Total Gasto:</span>
+            <span class="stat-value" id="totalCost">0.00 €</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h3>💧 Consumo de Água</h3>
+          <div class="stat">
+            <span>Consumo Atual:</span>
+            <span class="stat-value" id="waterConsumption">0 L/min</span>
+          </div>
+          <div class="stat">
+            <span>Custo/Hora:</span>
+            <span class="stat-value" id="waterCost">0.00 €</span>
+          </div>
+          <div class="stat">
+            <span>Total Água:</span>
+            <span class="stat-value" id="totalWater">0 L</span>
+          </div>
+        </div>
+      </div>
+      <p>Custo Total Combinado:</p>
+      <span class="stat-value" id="totalCombined">0€</span>
+    </div>
 
-      // Camera
-      const camera = {
-        x: 0,
-        y: 0,
-        width: canvas.width,
-        height: canvas.height,
-      };
-
-      // Imagens
-      const backgroundImg = new Image();
-      const characterImg = new Image();
-      let imagesLoaded = 0;
-      const totalImages = 2;
-
-      // Carregar mapa de colisão
-      async function loadCollisionMap() {
-        try {
-          const response = await fetch("./collision.txt");
-          const text = await response.text();
-          const lines = text.trim().split("\n");
-
-          collisionMap = lines.map((line) =>
-            line
-              .trim()
-              .split(" ")
-              .map((char) => parseInt(char))
-          );
-
-          mapHeight = collisionMap.length;
-          mapWidth = collisionMap[0]?.length || 0;
-          mapPixelWidth = mapWidth * TILE_SIZE;
-          mapPixelHeight = mapHeight * TILE_SIZE;
-
-          console.log(`Mapa carregado: ${mapWidth}x${mapHeight}`);
-        } catch (error) {
-          console.error("Erro ao carregar collision.txt:", error);
-          // Mapa padrão maior se não carregar
-          mapWidth = 60;
-          mapHeight = 40;
-          mapPixelWidth = mapWidth * TILE_SIZE;
-          mapPixelHeight = mapHeight * TILE_SIZE;
-          collisionMap = Array(mapHeight)
-            .fill(0)
-            .map(() => Array(mapWidth).fill(0));
-        }
-      }
-
-      // Verificar colisão
-      function checkCollision(x, y, width, height) {
-        // Criar hitbox menor focada nos pés do personagem
-        const hitbox = {
-          x: x + width * 0.25,
-          y: y + height * 0.5,
-          width: width * 0.5,
-          height: height * 0.5,
-        };
-
-        // Verificar os 4 cantos da hitbox
-        const points = [
-          { x: hitbox.x, y: hitbox.y },
-          { x: hitbox.x + hitbox.width, y: hitbox.y },
-          { x: hitbox.x, y: hitbox.y + hitbox.height - 1 },
-          { x: hitbox.x + hitbox.width, y: hitbox.y + hitbox.height - 1 },
-        ];
-
-        for (let point of points) {
-          const tileX = Math.floor(point.x / TILE_SIZE);
-          const tileY = Math.floor(point.y / TILE_SIZE);
-
-          if (
-            tileY >= 0 &&
-            tileY < mapHeight &&
-            tileX >= 0 &&
-            tileX < mapWidth
-          ) {
-            if (collisionMap[tileY][tileX] === 1) {
-              return true;
-            }
-          }
-        }
-        return false;
-      }
-
-      // Configurações do sprite
-      const sprite = {
-        x: 100,
-        y: 200,
-        speed: 3,
-
-        frameWidth: 64,
-        frameHeight: 64,
-        framesPerRow: 4,
-        currentFrame: 0,
-        frameCounter: 0,
-        animationSpeed: 8,
-
-        direction: 0,
-        isMoving: false,
-      };
-
-      // Teclas
-      const keys = {
-        ArrowUp: false,
-        ArrowDown: false,
-        ArrowLeft: false,
-        ArrowRight: false,
-        w: false,
-        a: false,
-        s: false,
-        d: false,
-      };
-
-      // Atualizar câmera para seguir o personagem
-      function updateCamera() {
-        // Centralizar câmera no personagem
-        camera.x = sprite.x + sprite.frameWidth / 2 - camera.width / 2;
-        camera.y = sprite.y + sprite.frameHeight / 2 - camera.height / 2;
-
-        // Limitar câmera aos limites do mapa
-        camera.x = Math.max(
-          0,
-          Math.min(mapPixelWidth - camera.width, camera.x)
-        );
-        camera.y = Math.max(
-          0,
-          Math.min(mapPixelHeight - camera.height, camera.y)
-        );
-      }
-
-      // Carregar imagens
-      function imageLoaded() {
-        imagesLoaded++;
-        if (imagesLoaded === totalImages) {
-          console.log("Todas as imagens carregadas!");
-        }
-      }
-
-      backgroundImg.onload = imageLoaded;
-      backgroundImg.onerror = () => {
-        console.log("Imagem de fundo não encontrada");
-        imageLoaded();
-      };
-      backgroundImg.src = "./map.png";
-
-      characterImg.onload = imageLoaded;
-      characterImg.onerror = () => {
-        console.log("Imagem do personagem não encontrada");
-        imageLoaded();
-      };
-      characterImg.src = "./character.png";
-
-      // Teclado
-      window.addEventListener("keydown", (e) => {
-        if (keys.hasOwnProperty(e.key)) {
-          keys[e.key] = true;
-          e.preventDefault();
-        }
-      });
-
-      window.addEventListener("keyup", (e) => {
-        if (keys.hasOwnProperty(e.key)) {
-          keys[e.key] = false;
-          e.preventDefault();
-        }
-      });
-
-      // Atualizar
-      function update() {
-        sprite.isMoving = false;
-
-        const oldX = sprite.x;
-        const oldY = sprite.y;
-
-        if (keys.ArrowUp || keys.w) {
-          sprite.y -= sprite.speed;
-          sprite.direction = 3;
-          sprite.isMoving = true;
-        }
-        if (keys.ArrowDown || keys.s) {
-          sprite.y += sprite.speed;
-          sprite.direction = 0;
-          sprite.isMoving = true;
-        }
-        if (keys.ArrowLeft || keys.a) {
-          sprite.x -= sprite.speed;
-          sprite.direction = 1;
-          sprite.isMoving = true;
-        }
-        if (keys.ArrowRight || keys.d) {
-          sprite.x += sprite.speed;
-          sprite.direction = 2;
-          sprite.isMoving = true;
-        }
-
-        if (sprite.isMoving) {
-          if (
-            checkCollision(
-              sprite.x,
-              sprite.y,
-              sprite.frameWidth,
-              sprite.frameHeight
-            )
-          ) {
-            sprite.x = oldX;
-            sprite.y = oldY;
-          }
-        }
-
-        // Limites do mapa (não do canvas)
-        sprite.x = Math.max(
-          0,
-          Math.min(mapPixelWidth - sprite.frameWidth, sprite.x)
-        );
-        sprite.y = Math.max(
-          0,
-          Math.min(mapPixelHeight - sprite.frameHeight, sprite.y)
-        );
-
-        if (sprite.isMoving) {
-          sprite.frameCounter++;
-          if (sprite.frameCounter >= sprite.animationSpeed) {
-            sprite.frameCounter = 0;
-            sprite.currentFrame =
-              (sprite.currentFrame + 1) % sprite.framesPerRow;
-          }
-        } else {
-          sprite.currentFrame = 0;
-          sprite.frameCounter = 0;
-        }
-
-        updateCamera();
-      }
-
-      // Renderizar
-      function render() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Desenhar fundo (com offset da câmera)
-        if (backgroundImg.complete && backgroundImg.naturalWidth > 0) {
-          ctx.drawImage(
-            backgroundImg,
-            camera.x,
-            camera.y,
-            camera.width,
-            camera.height,
-            0,
-            0,
-            camera.width,
-            camera.height
-          );
-        } else {
-          ctx.fillStyle = "#ecf0f1";
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        // Grelha (com offset da câmera)
-        ctx.strokeStyle = "rgba(189, 195, 199, 0.3)";
-        ctx.lineWidth = 1;
-        const startX = Math.floor(camera.x / TILE_SIZE) * TILE_SIZE;
-        const startY = Math.floor(camera.y / TILE_SIZE) * TILE_SIZE;
-        const endX = camera.x + camera.width;
-        const endY = camera.y + camera.height;
-
-        for (let i = startX; i <= endX; i += TILE_SIZE) {
-          ctx.beginPath();
-          ctx.moveTo(i - camera.x, 0);
-          ctx.lineTo(i - camera.x, canvas.height);
-          ctx.stroke();
-        }
-        for (let i = startY; i <= endY; i += TILE_SIZE) {
-          ctx.beginPath();
-          ctx.moveTo(0, i - camera.y);
-          ctx.lineTo(canvas.width, i - camera.y);
-          ctx.stroke();
-        }
-
-        // Desenhar sprite (com offset da câmera)
-        const screenX = sprite.x - camera.x;
-        const screenY = sprite.y - camera.y;
-
-        if (characterImg.complete && characterImg.naturalWidth > 0) {
-          ctx.drawImage(
-            characterImg,
-            sprite.currentFrame * sprite.frameWidth,
-            sprite.direction * sprite.frameHeight,
-            sprite.frameWidth,
-            sprite.frameHeight,
-            screenX,
-            screenY,
-            sprite.frameWidth,
-            sprite.frameHeight
-          );
-        } else {
-          ctx.fillStyle = "#e74c3c";
-          ctx.fillRect(screenX, screenY, sprite.frameWidth, sprite.frameHeight);
-          ctx.fillStyle = "#fff";
-          ctx.font = "12px Arial";
-          ctx.fillText("PLAYER", screenX + 10, screenY + 35);
-        }
-
-        // Info de debug
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(5, 5, 250, 95);
-        ctx.fillStyle = "#2c3e50";
-        ctx.font = "14px Arial";
-        ctx.fillText(
-          `Pos: (${Math.round(sprite.x)}, ${Math.round(sprite.y)})`,
-          10,
-          20
-        );
-        ctx.fillText(
-          `Câmera: (${Math.round(camera.x)}, ${Math.round(camera.y)})`,
-          10,
-          40
-        );
-        ctx.fillText(
-          `Direção: ${
-            ["Baixo", "Esquerda", "Direita", "Cima"][sprite.direction]
-          }`,
-          10,
-          60
-        );
-        ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80);
-      }
-
-      // Game loop
-      function gameLoop() {
-        update();
-        render();
-        requestAnimationFrame(gameLoop);
-      }
-
-      // Inicializar
-      loadCollisionMap().then(() => {
-        gameLoop();
-      });
-    </script>
+    <script src="./menu.js"></script>
+    <script src="./game.js"></script>
   </body>
 </html>
