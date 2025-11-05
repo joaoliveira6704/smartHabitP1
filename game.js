@@ -142,8 +142,8 @@ const devices = [
   {
     type: "water",
     waterFlow: 10,
-    x: 120,
-    y: 480,
+    x: 220,
+    y: 300,
     room: "Casa de Banho",
     on: false,
     label: "Torneira",
@@ -289,6 +289,28 @@ function checkCollision(x, y, width, height) {
   }
   return false;
 }
+const waterCost = document.getElementById("waterCost");
+const waterConsumption = document.getElementById("waterConsumption");
+
+function calculateCost() {
+  let totalEnergyConsumption = 0;
+  let totalWaterConsumption = 0;
+  devices.forEach((device) => {
+    if (device.on) {
+      if (device.type == "light" || device.type == "appliance") {
+        totalEnergyConsumption += device.power;
+        totalCost += ((device.power / 1000) * PRICE_PER_KWH) / 3600;
+      } else {
+        totalWaterConsumption += device.waterFlow;
+        totalWaterCost += (device.waterFlow / 1000) * PRICE_PER_M3_WATER;
+        totalWaterLiters += device.waterFlow / 60;
+      }
+    }
+  });
+  waterConsumption.innerHTML = `${totalWaterConsumption}L/MIN`;
+  waterCost.innerHTML = `${parseFloat(totalWaterCost).toFixed(2)}€`;
+  totalWater.innerHTML = `${parseInt(totalWaterLiters)}L`;
+}
 
 // Configurações do sprite
 const sprite = {
@@ -416,7 +438,12 @@ function update() {
     sprite.currentFrame = 0;
     sprite.frameCounter = 0;
   }
-
+  gameTime += 1;
+  // Atualizar custos (a cada segundo)
+  gameTime++;
+  if (gameTime % 60 === 0) {
+    calculateCost();
+  }
   updateCamera();
 }
 
@@ -555,7 +582,7 @@ function render() {
     ctx.fillText("PLAYER", screenX + 10, screenY + 35);
   }
 
-  /* // Info de debug
+  // Info de debug
   ctx.fillStyle = "#fff";
   ctx.fillRect(5, 5, 250, 95);
   ctx.fillStyle = "#2c3e50";
@@ -575,7 +602,7 @@ function render() {
     10,
     60
   );
-  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80); */
+  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80);
 }
 
 // Game loop

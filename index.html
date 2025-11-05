@@ -8,8 +8,8 @@
   </head>
   <body>
     <div class="menu-container" id="menu">
-      <img src="logo.svg" alt="logo" srcset="" style="width: 40%" />
-      <div class="menu-buttons">
+      <img id="logo" src="logo.svg" alt="logo" srcset="" style="width: 40%" />
+      <div id="menu-btns" class="menu-buttons">
         <button class="menu-btn btn-play" id="playBtn">Jogar</button>
         <button class="menu-btn btn-instructions" id="instructionsBtn">
           Instruções
@@ -18,12 +18,8 @@
           Objetivos
         </button>
       </div>
-    </div>
-
-    <div class="game-container" id="game">
-      <canvas id="gameCanvas" width="600" height="400"></canvas>
-      <div id="instructions" style="display: none">
-        <h4>📖 Como Jogar</h4>
+      <div id="instructions-container" style="display: none">
+        <h1>📖 Como Jogar</h1>
         <ul>
           <li><strong> Mover:</strong> WASD</li>
           <li>
@@ -43,7 +39,14 @@
             liga/desliga automaticamente
           </li>
         </ul>
+        <button class="menu-btn btn-instructions" id="back-btn">
+          <-- Voltar
+        </button>
       </div>
+    </div>
+
+    <div class="game-container" id="game">
+      <canvas id="gameCanvas" width="600" height="400"></canvas>
 
       <div id="panel-wrapper">
         <div class="panel">

@@ -11,6 +11,17 @@
   font-size: large;
 }
 
+ul {
+  font-size: 30px;
+  text-align: left;
+}
+
+li,
+strong {
+  font-size: 20px;
+  text-align: left;
+}
+
 body {
   background: linear-gradient(135deg, green 0%, rgb(37, 79, 37) 100%);
   height: 100vh;
@@ -18,6 +29,10 @@ body {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+}
+
+#back-btn {
+  margin-top: 40px;
 }
 
 .menu-container {
@@ -49,7 +64,7 @@ body {
 }
 
 h1 {
-  color: #667eea;
+  color: green;
   font-size: 2.5em;
   margin-bottom: 15px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
