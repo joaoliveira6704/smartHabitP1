@@ -6,11 +6,11 @@ const ctx = canvas.getContext("2d");
 // Configurações do jogo
 const PRICE_PER_KWH = 0.15; // €/kWh
 const PRICE_PER_M3_WATER = 1.5; // €/m³
-let totalCost = 0;
 let totalWaterCost = 0;
 let totalWaterLiters = 0;
 let gameTime = 0;
-let totalCombined = totalCost + totalWaterCost;
+let totalCost = 0,
+  hourlyCost = 0;
 
 // Verificar se há dispositivo próximo
 function getNearbyDevice() {
@@ -138,15 +138,21 @@ function checkCollision(x, y, width, height) {
 }
 const waterCost = document.getElementById("waterCost");
 const waterConsumption = document.getElementById("waterConsumption");
+const energyConsumption = document.getElementById("energyConsumption");
+const energyCost = document.getElementById("energyCost");
+const energyTotalCost = document.getElementById("energyTotalCost");
+const totalCombinedLabel = document.getElementById("totalCombined");
 
 function calculateCost() {
-  let totalEnergyConsumption = 0;
-  let totalWaterConsumption = 0;
+  let totalEnergyConsumption = 0,
+    totalWaterConsumption = 0;
+
   devices.forEach((device) => {
     if (device.on) {
       if (device.type == "light" || device.type == "appliance") {
         totalEnergyConsumption += device.power;
-        totalCost += ((device.power / 1000) * PRICE_PER_KWH) / 3600;
+        hourlyCost += ((device.power / 1000) * PRICE_PER_KWH) / 3600;
+        totalCost += PRICE_PER_KWH / 60;
       } else {
         totalWaterConsumption += device.waterFlow;
         totalWaterCost += (device.waterFlow / 1000) * PRICE_PER_M3_WATER;
@@ -154,9 +160,16 @@ function calculateCost() {
       }
     }
   });
-  waterConsumption.innerHTML = `${totalWaterConsumption}L/MIN`;
-  waterCost.innerHTML = `${parseFloat(totalWaterCost).toFixed(2)}€`;
-  totalWater.innerHTML = `${parseInt(totalWaterLiters)}L`;
+
+  let totalCombined = totalCost + totalWaterCost;
+
+  totalCombinedLabel.innerHTML = `${parseFloat(totalCombined).toFixed(2)} €`;
+  energyConsumption.innerHTML = `${totalEnergyConsumption} W`;
+  energyCost.innerHTML = `${parseFloat(hourlyCost).toFixed(2)} €`;
+  energyTotalCost.innerHTML = `${parseInt(totalCost)} €`;
+  waterConsumption.innerHTML = `${totalWaterConsumption} L/MIN`;
+  waterCost.innerHTML = `${parseFloat(totalWaterCost).toFixed(2)} €`;
+  totalWater.innerHTML = `${parseInt(totalWaterLiters)} L`;
 }
 
 // Configurações do sprite
