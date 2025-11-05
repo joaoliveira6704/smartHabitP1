@@ -292,8 +292,8 @@ function checkCollision(x, y, width, height) {
 
 // Configurações do sprite
 const sprite = {
-  x: 100,
-  y: 200,
+  x: 260,
+  y: 250,
   speed: 3,
 
   frameWidth: 64,
