@@ -79,7 +79,7 @@ const totalImages = 2;
 // Carregar mapa de colisão
 async function loadCollisionMap() {
   try {
-    const response = await fetch("./collision.txt");
+    const response = await fetch("./js/data/collision.txt");
     const text = await response.text();
     const lines = text.trim().split("\n");
 
@@ -186,13 +186,13 @@ backgroundImg.onload = imageLoaded;
 backgroundImg.onerror = () => {
   imageLoaded();
 };
-backgroundImg.src = "./map.png";
+backgroundImg.src = "../assets/main/map.png";
 
 characterImg.onload = imageLoaded;
 characterImg.onerror = () => {
   imageLoaded();
 };
-characterImg.src = "./character.png";
+characterImg.src = "../assets/main/character.png";
 
 // Teclado
 window.addEventListener("keydown", (e) => {
