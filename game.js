@@ -150,7 +150,7 @@ const devices = [
 
 // Verificar se há dispositivo próximo
 function getNearbyDevice() {
-  const interactionDistance = 80;
+  const interactionDistance = 20;
   const playerCenterX = sprite.x + sprite.frameWidth / 2;
   const playerCenterY = sprite.y + sprite.frameHeight / 2;
 
@@ -450,9 +450,77 @@ function render() {
     ctx.stroke();
   } */
 
+  // Desenhar dispositivos (com offset da câmera)
+  devices.forEach((device) => {
+    const deviceScreenX = device.x - camera.x;
+    const deviceScreenY = device.y - camera.y;
+
+    // Só desenhar se estiver visível na tela
+    if (
+      deviceScreenX > -50 &&
+      deviceScreenX < canvas.width + 50 &&
+      deviceScreenY > -50 &&
+      deviceScreenY < canvas.height + 50
+    ) {
+      if (device.type === "light") {
+        // Desenhar luz
+        ctx.fillStyle = device.on ? lightTypes[device.lightType].color : "#666";
+        ctx.beginPath();
+        ctx.arc(deviceScreenX, deviceScreenY, 15, 0, Math.PI * 2);
+        ctx.fill();
+        if (device.on) {
+          ctx.strokeStyle = "rgba(255, 255, 0, 0.5)";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+      } else {
+        // Desenhar eletrodoméstico ou água
+        ctx.font = "30px Arial";
+        ctx.fillText(
+          device.icon || "⚡",
+          deviceScreenX - 15,
+          deviceScreenY + 10
+        );
+        if (device.on) {
+          ctx.strokeStyle = "#4CAF50";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(deviceScreenX - 20, deviceScreenY - 20, 40, 40);
+        }
+      }
+
+      // Label
+      ctx.fillStyle = "#000";
+      ctx.font = "10px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(device.label, deviceScreenX, deviceScreenY + 30);
+      ctx.textAlign = "left";
+    }
+  });
+
   // Desenhar sprite (com offset da câmera)
   const screenX = sprite.x - camera.x;
   const screenY = sprite.y - camera.y;
+
+  if (characterImg.complete && characterImg.naturalWidth > 0) {
+    ctx.drawImage(
+      characterImg,
+      sprite.currentFrame * sprite.frameWidth,
+      sprite.direction * sprite.frameHeight,
+      sprite.frameWidth,
+      sprite.frameHeight,
+      screenX,
+      screenY,
+      sprite.frameWidth,
+      sprite.frameHeight
+    );
+    console.log("Movimneto");
+  } else {
+    ctx.fillStyle = "#e74c3c";
+    ctx.fillRect(screenX, screenY, sprite.frameWidth, sprite.frameHeight);
+    ctx.fillStyle = "#fff";
+    ctx.font = "12px Arial";
+    ctx.fillText("PLAYER", screenX + 10, screenY + 35);
+  }
 
   if (characterImg.complete && characterImg.naturalWidth > 0) {
     ctx.drawImage(
