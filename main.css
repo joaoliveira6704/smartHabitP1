@@ -95,25 +95,25 @@ h1 {
   transform: translateY(-1px);
 }
 
-.btn-options {
+.btn-objectives {
   background: white;
   color: green;
   border: 2px solid green;
 }
 
-.btn-options:hover {
+.btn-objectives:hover {
   background: green;
   color: white;
   transform: translateY(-2px);
 }
 
-.btn-credits {
+.btn-instructions {
   background: white;
   color: green;
   border: 2px solid green;
 }
 
-.btn-credits:hover {
+.btn-instructions:hover {
   background: green;
   color: white;
   transform: translateY(-2px);

@@ -1,4 +1,6 @@
 const playBtn = document.getElementById("playBtn");
+const instructionsBtn = document.getElementById("instructionsBtn");
+const objectivesBtn = document.getElementById("objectivesBtn");
 const menu = document.getElementById("menu");
 const game = document.getElementById("game");
 
@@ -11,6 +13,16 @@ playBtn.addEventListener("click", function () {
     game.classList.add("show");
     game.style.visibility = "visible"; // show canvas area
   }, 500);
+});
+
+// Start game
+instructionsBtn.addEventListener("click", function () {
+  menu.innerHTML = `
+  <button class="menu-btn btn-objectives" id="objectivesBtn">
+          Voltar
+        </button>
+  <div>Instruções</div>
+  <button class="menu-btn btn-play" id="playBtn">Jogar</button>`;
 });
 
 // Return to menu with "P"
