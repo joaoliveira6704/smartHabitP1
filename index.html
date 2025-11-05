@@ -3,13 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sprite com Animação</title>
-    <link rel="stylesheet" href="main.css" />
+    <title>Smart Habit</title>
+    <link
+      rel="shortcut icon"
+      href="./assets/main/logo.svg"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="./css/main.css" />
   </head>
   <body>
     <div class="menu-container" id="menu">
-      <img id="logo" src="logo.svg" alt="logo" srcset="" style="width: 40%" />
-      <div id="menu-btns" class="menu-buttons">
+      <img
+        src="./assets/main/logo.svg"
+        alt="logo"
+        srcset=""
+        style="width: 40%"
+      />
+      <div class="menu-buttons">
         <button class="menu-btn btn-play" id="playBtn">Jogar</button>
         <button class="menu-btn btn-instructions" id="instructionsBtn">
           Instruções
@@ -84,7 +94,7 @@
       <span class="stat-value" id="totalCombined">0€</span>
     </div>
 
-    <script src="./menu.js"></script>
-    <script src="./game.js"></script>
+    <script src="./js/menu.js"></script>
+    <script src="./js/game.js" type="module"></script>
   </body>
 </html>

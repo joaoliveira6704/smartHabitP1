@@ -1,3 +1,5 @@
+import { rooms, devices, lightTypes } from "./data/data.js";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -10,147 +12,9 @@ let totalWaterLiters = 0;
 let gameTime = 0;
 let totalCombined = totalCost + totalWaterCost;
 
-// Definição das divisões
-const rooms = [
-  {
-    name: "Wc Suite",
-    x: 1088,
-    y: 496,
-    width: 288,
-    height: 336,
-    color: "red",
-  },
-  {
-    name: "Wc",
-    x: 50,
-    y: 350,
-    width: 200,
-    height: 200,
-    color: "#e3f2fd",
-  },
-];
-
-// Tipos de iluminação
-const lightTypes = {
-  LED: { power: 10, color: "#ffd700", efficiency: "Alta" },
-  TUNGSTEN: { power: 60, color: "#ffb347", efficiency: "Média" },
-  INCANDESCENT: { power: 100, color: "#ff6b6b", efficiency: "Baixa" },
-  HALOGEN: { power: 75, color: "#ff9ff3", efficiency: "Média-Baixa" },
-};
-
-// Dispositivos
-const devices = [
-  // Luzes
-  {
-    type: "light",
-    lightType: "LED",
-    x: 150,
-    y: 100,
-    room: "Sala",
-    on: false,
-    label: "Luz LED",
-    id: "light1",
-  },
-  {
-    type: "light",
-    lightType: "INCANDESCENT",
-    x: 550,
-    y: 100,
-    room: "Cozinha",
-    on: false,
-    label: "Luz Inc.",
-    id: "light2",
-  },
-  {
-    type: "light",
-    lightType: "LED",
-    x: 120,
-    y: 420,
-    room: "Casa de Banho",
-    on: false,
-    label: "Luz LED",
-    id: "light3",
-  },
-  {
-    type: "light",
-    lightType: "HALOGEN",
-    x: 500,
-    y: 420,
-    room: "Quarto",
-    on: false,
-    label: "Luz Halog.",
-    sensor: true,
-    id: "light4",
-  },
-
-  // Eletrodomésticos
-  {
-    type: "appliance",
-    power: 150,
-    x: 600,
-    y: 150,
-    room: "Cozinha",
-    on: false,
-    label: "Micro-ondas",
-    icon: "📱",
-    id: "micro",
-    soundType: "appliance",
-  },
-  {
-    type: "appliance",
-    power: 200,
-    x: 200,
-    y: 150,
-    room: "Sala",
-    on: false,
-    label: "TV",
-    icon: "📺",
-    id: "tv",
-    soundType: "tv",
-  },
-
-  // Água
-  {
-    type: "water",
-    waterFlow: 12,
-    x: 650,
-    y: 200,
-    room: "Cozinha",
-    on: false,
-    label: "Torneira",
-    icon: "🚰",
-    id: "tap1",
-    soundType: "water",
-  },
-  {
-    type: "water",
-    waterFlow: 10,
-    x: 220,
-    y: 300,
-    room: "Casa de Banho",
-    on: false,
-    label: "Torneira",
-    icon: "🚰",
-    id: "tap2",
-    soundType: "water",
-  },
-  {
-    type: "water",
-    waterFlow: 6,
-    x: 180,
-    y: 480,
-    room: "Casa de Banho",
-    on: false,
-    label: "Autoclismo",
-    icon: "🚽",
-    id: "flush",
-    soundType: "water",
-  },
-];
-
 // Verificar se há dispositivo próximo
 function getNearbyDevice() {
-  const interactionDistance = 20;
+  const interactionDistance = 100;
   const playerCenterX = sprite.x + sprite.frameWidth / 2;
   const playerCenterY = sprite.y + sprite.frameHeight / 2;
 
@@ -174,7 +38,7 @@ function interactWithDevice() {
   device.on = !device.on;
 
   // Feedback visual
-  console.log(`${device.label} ${device.on ? "ligado" : "desligado"}`);
+  console.log(`${device.power} ${device.on ? "ligado" : "desligado"}`);
 }
 
 // Controle de teclas
@@ -215,7 +79,7 @@ const totalImages = 2;
 // Carregar mapa de colisão
 async function loadCollisionMap() {
   try {
-    const response = await fetch("./collision.txt");
+    const response = await fetch("./js/data/collision.txt");
     const text = await response.text();
     const lines = text.trim().split("\n");
 
@@ -344,13 +208,13 @@ backgroundImg.onload = imageLoaded;
 backgroundImg.onerror = () => {
   imageLoaded();
 };
-backgroundImg.src = "./map.png";
+backgroundImg.src = "../assets/main/map.png";
 
 characterImg.onload = imageLoaded;
 characterImg.onerror = () => {
   imageLoaded();
 };
-characterImg.src = "./character.png";
+characterImg.src = "../assets/main/character.png";
 
 // Teclado
 window.addEventListener("keydown", (e) => {
@@ -435,7 +299,7 @@ function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Desenhar fundo (com offset da câmera)
-  if (backgroundImg.complete && backgroundImg.naturalWidth > 0) {
+  if (backgroundImg.complete) {
     ctx.drawImage(
       backgroundImg,
       camera.x,
@@ -447,10 +311,15 @@ function render() {
       camera.width,
       camera.height
     );
-    rooms.forEach((room) => {
-      ctx.fillStyle = "red";
-      ctx.fillRect(room.x, room.y, room.width, room.height);
-    });
+    /* rooms.forEach((room) => {
+      ctx.fillStyle = "rgb(255 0 0 / 50%)";
+      ctx.fillRect(
+        room.x - camera.x,
+        room.y - camera.y,
+        room.width,
+        room.height
+      );
+    }); */
   } else {
     ctx.fillStyle = "#ecf0f1";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -478,6 +347,7 @@ function render() {
   } */
 
   // Desenhar dispositivos (com offset da câmera)
+  // In the render function, replace the device drawing section with:
   devices.forEach((device) => {
     const deviceScreenX = device.x - camera.x;
     const deviceScreenY = device.y - camera.y;
@@ -502,25 +372,18 @@ function render() {
         }
       } else {
         // Desenhar eletrodoméstico ou água
-        ctx.font = "30px Arial";
-        ctx.fillText(
-          device.icon || "⚡",
-          deviceScreenX - 15,
-          deviceScreenY + 10
-        );
-        if (device.on) {
-          ctx.strokeStyle = "#4CAF50";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(deviceScreenX - 20, deviceScreenY - 20, 40, 40);
-        }
+        let img = new Image();
+        img.src = device.on ? device.dOn : device.dOff;
+
+        ctx.drawImage(img, device.x - camera.x, device.y - camera.y, 48, 48);
       }
 
-      // Label
+      /* // Label
       ctx.fillStyle = "#000";
       ctx.font = "10px Arial";
       ctx.textAlign = "center";
       ctx.fillText(device.label, deviceScreenX, deviceScreenY + 30);
-      ctx.textAlign = "left";
+      ctx.textAlign = "left"; */
     }
   });
 
@@ -540,7 +403,7 @@ function render() {
       sprite.frameWidth,
       sprite.frameHeight
     );
-    console.log("Movimneto");
+    /* console.log("Movimneto"); */
   } else {
     ctx.fillStyle = "#e74c3c";
     ctx.fillRect(screenX, screenY, sprite.frameWidth, sprite.frameHeight);
@@ -569,7 +432,7 @@ function render() {
     ctx.fillText("PLAYER", screenX + 10, screenY + 35);
   }
 
-  // Info de debug
+  /* // Info de debug
   ctx.fillStyle = "#fff";
   ctx.fillRect(5, 5, 250, 95);
   ctx.fillStyle = "#2c3e50";
@@ -589,7 +452,7 @@ function render() {
     10,
     60
   );
-  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80);
+  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80); */
 }
 
 // Game loop
