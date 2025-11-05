@@ -13,37 +13,20 @@ let totalCombined = totalCost + totalWaterCost;
 // Definição das divisões
 const rooms = [
   {
-    name: "Sala",
-    x: 50,
-    y: 50,
-    width: 300,
-    height: 250,
-    color: "#e8f5e9",
+    name: "Wc Suite",
+    x: 1088,
+    y: 496,
+    width: 288,
+    height: 336,
+    color: "red",
   },
   {
-    name: "Cozinha",
-    x: 400,
-    y: 50,
-    width: 350,
-    height: 250,
-    color: "#fff3e0",
-  },
-  {
-    name: "Casa de Banho",
+    name: "Wc",
     x: 50,
     y: 350,
     width: 200,
     height: 200,
     color: "#e3f2fd",
-  },
-  {
-    name: "Quarto",
-    x: 300,
-    y: 350,
-    width: 450,
-    height: 200,
-    color: "#f3e5f5",
-    hasSensor: true,
   },
 ];
 
@@ -437,6 +420,10 @@ function render() {
       camera.width,
       camera.height
     );
+    rooms.forEach((room) => {
+      ctx.fillStyle = "red";
+      ctx.fillRect(room.x, room.y, room.width, room.height);
+    });
   } else {
     ctx.fillStyle = "#ecf0f1";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -487,7 +474,7 @@ function render() {
     ctx.fillText("PLAYER", screenX + 10, screenY + 35);
   }
 
-  /* // Info de debug
+  // Info de debug
   ctx.fillStyle = "#fff";
   ctx.fillRect(5, 5, 250, 95);
   ctx.fillStyle = "#2c3e50";
@@ -507,7 +494,7 @@ function render() {
     10,
     60
   );
-  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80); */
+  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80);
 }
 
 // Game loop
