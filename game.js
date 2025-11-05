@@ -40,7 +40,7 @@ const lightTypes = {
 
 // Dispositivos
 const devices = [
-  // Luzes
+  /* // Luzes
   {
     type: "light",
     lightType: "LED",
@@ -82,21 +82,22 @@ const devices = [
     sensor: true,
     id: "light4",
   },
-
+ */
   // Eletrodomésticos
   {
     type: "appliance",
     power: 150,
-    x: 600,
-    y: 150,
-    room: "Cozinha",
+    x: 48,
+    y: 480,
+    width: 48,
+    height: 48,
     on: false,
-    label: "Micro-ondas",
-    icon: "📱",
+    dOff: "./assets/microwaveOff.png",
+    dOn: "./assets/microwaveOn.png",
     id: "micro",
     soundType: "appliance",
   },
-  {
+  /* {
     type: "appliance",
     power: 200,
     x: 200,
@@ -145,12 +146,12 @@ const devices = [
     icon: "🚽",
     id: "flush",
     soundType: "water",
-  },
+  }, */
 ];
 
 // Verificar se há dispositivo próximo
 function getNearbyDevice() {
-  const interactionDistance = 20;
+  const interactionDistance = 100;
   const playerCenterX = sprite.x + sprite.frameWidth / 2;
   const playerCenterY = sprite.y + sprite.frameHeight / 2;
 
@@ -173,8 +174,24 @@ function interactWithDevice() {
 
   device.on = !device.on;
 
+  let img = new Image();
+  if (device.on) {
+    img.src = device.dOn;
+  } else {
+    img.src = device.dOff;
+  }
+
+  img.onload = ctx.drawImage(
+    img,
+    device.x - camera.x,
+    device.y - camera.y,
+    48,
+    48
+  );
+
+  console.log(device);
   // Feedback visual
-  console.log(`${device.label} ${device.on ? "ligado" : "desligado"}`);
+  console.log(`${device.power} ${device.on ? "ligado" : "desligado"}`);
 }
 
 // Controle de teclas
@@ -480,25 +497,22 @@ function render() {
         }
       } else {
         // Desenhar eletrodoméstico ou água
-        ctx.font = "30px Arial";
-        ctx.fillText(
-          device.icon || "⚡",
-          deviceScreenX - 15,
-          deviceScreenY + 10
-        );
+        let img = new Image();
+        img.src = device.dOff;
+
+        ctx.drawImage(img, device.x - camera.x, device.y - camera.y, 48, 48);
+
         if (device.on) {
-          ctx.strokeStyle = "#4CAF50";
-          ctx.lineWidth = 2;
-          ctx.strokeRect(deviceScreenX - 20, deviceScreenY - 20, 40, 40);
+          img.src = device.dOn;
         }
       }
 
-      // Label
+      /* // Label
       ctx.fillStyle = "#000";
       ctx.font = "10px Arial";
       ctx.textAlign = "center";
       ctx.fillText(device.label, deviceScreenX, deviceScreenY + 30);
-      ctx.textAlign = "left";
+      ctx.textAlign = "left"; */
     }
   });
 
@@ -518,7 +532,7 @@ function render() {
       sprite.frameWidth,
       sprite.frameHeight
     );
-    console.log("Movimneto");
+    /* console.log("Movimneto"); */
   } else {
     ctx.fillStyle = "#e74c3c";
     ctx.fillRect(screenX, screenY, sprite.frameWidth, sprite.frameHeight);
@@ -547,7 +561,7 @@ function render() {
     ctx.fillText("PLAYER", screenX + 10, screenY + 35);
   }
 
-  // Info de debug
+  /* // Info de debug
   ctx.fillStyle = "#fff";
   ctx.fillRect(5, 5, 250, 95);
   ctx.fillStyle = "#2c3e50";
@@ -567,7 +581,7 @@ function render() {
     10,
     60
   );
-  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80);
+  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80); */
 }
 
 // Game loop
