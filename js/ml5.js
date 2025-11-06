@@ -7,9 +7,9 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(580, 300);
+  createCanvas(460, 300);
   video = createCapture(VIDEO);
-  video.size(580, 300);
+  video.size(460, 300);
   video.hide();
   handPose.detectStart(video, gotHands);
 }
