@@ -327,14 +327,14 @@ function update() {
     calculateCost();
   }
 
-  const currentHandRaisedState = window.detectHandRaised();
+  /* const currentHandRaisedState = window.detectHandRaised();
 
   if (currentHandRaisedState && !lastHandRaisedState) {
     interactWithDevice();
   }
 
   lastHandRaisedState = currentHandRaisedState;
-
+ */
   updateCamera();
 }
 
@@ -409,8 +409,8 @@ function render() {
 
           ctx.drawImage(
             img,
-            device.x - camera.x,
-            device.x - camera.y,
+            deviceScreenX,
+            deviceScreenY,
             device.width,
             device.height
           );
