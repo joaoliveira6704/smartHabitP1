@@ -1,5 +1,4 @@
 import { rooms, devices, lightTypes } from "./data/data.js";
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -9,8 +8,14 @@ const PRICE_PER_M3_WATER = 1.5; // €/m³
 let totalWaterCost = 0,
   totalWaterLiters = 0,
   gameTime = 0,
-  totalCost = 0,
-  hourlyCost = 0;
+  totalCost = 0;
+const waterCost = document.getElementById("waterCost");
+const waterConsumption = document.getElementById("waterConsumption");
+const energyConsumption = document.getElementById("energyConsumption");
+const energyCost = document.getElementById("energyCost");
+const energyTotalCost = document.getElementById("energyTotalCost");
+const totalCombinedLabel = document.getElementById("totalCombined");
+let lastHandRaisedState = false;
 
 // Verificar se há dispositivo próximo
 function getNearbyDevice() {
@@ -41,7 +46,45 @@ function interactWithDevice() {
   console.log(`${device.power} ${device.on ? "ligado" : "desligado"}`);
 }
 
-// Controlo pro teclas
+function createTVSprite() {
+  // Criar frames coloridos para simular uma TV ligada
+  const upColors = [
+    "#ffffff",
+    "#f4f700",
+    "#87f6ec",
+    "#8dfa00",
+    "#d137e5",
+    "#d91e00",
+  ];
+  const midColors = [
+    "#d91e00",
+    "#000000",
+    "#d137e5",
+    "#000000",
+    "#87f6ec",
+    "#000000",
+    "#ffffff",
+  ];
+  const lowColors = [
+    "#000c61",
+    "#ffffff",
+    "#011a9a",
+    "#000000",
+    "#000000",
+    "#000000",
+  ];
+  for (let i = 135; i <= 190; i++) {
+    ctx.fillStyle = upColors[Math.floor(Math.random() * upColors.length)];
+    ctx.fillRect(i - camera.x, 195 - camera.y, 11, 25);
+    ctx.fillStyle = midColors[Math.floor(Math.random() * midColors.length)];
+    ctx.fillRect(i - camera.x, 215 - camera.y, 11, 4);
+    ctx.fillStyle = lowColors[Math.floor(Math.random() * lowColors.length)];
+    ctx.fillRect(i - camera.x, 219 - camera.y, 11, 11);
+    i += 10;
+  }
+}
+
+// Controle teclas
 document.addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
 
@@ -134,22 +177,17 @@ function checkCollision(x, y, width, height) {
   }
   return false;
 }
-const waterCost = document.getElementById("waterCost");
-const waterConsumption = document.getElementById("waterConsumption");
-const energyConsumption = document.getElementById("energyConsumption");
-const energyCost = document.getElementById("energyCost");
-const energyTotalCost = document.getElementById("energyTotalCost");
-const totalCombinedLabel = document.getElementById("totalCombined");
 
 function calculateCost() {
   let totalEnergyConsumption = 0,
-    totalWaterConsumption = 0;
+    totalWaterConsumption = 0,
+    hourlyCost = 0;
 
   devices.forEach((device) => {
     if (device.on) {
       if (device.type == "light" || device.type == "appliance") {
         totalEnergyConsumption += device.power;
-        hourlyCost += ((device.power / 1000) * PRICE_PER_KWH) / 3600;
+        hourlyCost += (device.power / 100) * PRICE_PER_KWH;
         totalCost += PRICE_PER_KWH / 60;
       } else {
         totalWaterConsumption += device.waterFlow;
@@ -164,7 +202,7 @@ function calculateCost() {
   totalCombinedLabel.innerHTML = `${parseFloat(totalCombined).toFixed(2)} €`;
   energyConsumption.innerHTML = `${totalEnergyConsumption} W`;
   energyCost.innerHTML = `${parseFloat(hourlyCost).toFixed(2)} €`;
-  energyTotalCost.innerHTML = `${parseInt(totalCost)} €`;
+  energyTotalCost.innerHTML = `${parseFloat(totalCost).toFixed(2)} €`;
   waterConsumption.innerHTML = `${totalWaterConsumption} L/MIN`;
   waterCost.innerHTML = `${parseFloat(totalWaterCost).toFixed(2)} €`;
   totalWater.innerHTML = `${parseInt(totalWaterLiters)} L`;
@@ -288,6 +326,15 @@ function update() {
   if (gameTime % 60 === 0) {
     calculateCost();
   }
+
+  const currentHandRaisedState = window.detectHandRaised();
+
+  if (currentHandRaisedState && !lastHandRaisedState) {
+    interactWithDevice();
+  }
+
+  lastHandRaisedState = currentHandRaisedState;
+
   updateCamera();
 }
 
@@ -356,10 +403,16 @@ function render() {
         }
       } else {
         // Desenhar eletrodoméstico ou água
-        let img = new Image();
-        img.src = device.on ? device.dOn : device.dOff;
+        if (device.dOn && device.dOff) {
+          let img = new Image();
+          img.src = device.on ? device.dOn : device.dOff;
 
-        ctx.drawImage(img, device.x - camera.x, device.y - camera.y, 48, 48);
+          ctx.drawImage(img, device.x - camera.x, device.y - camera.y, 48, 48);
+        } else {
+          if ((device.name === "TV") & device.on) {
+            createTVSprite();
+          }
+        }
 
         if (device.audioElement) {
           if (device.on) {
@@ -396,8 +449,11 @@ function render() {
       ctx.fillStyle = "#000";
       ctx.font = "16px BlockBlueprint";
       ctx.textAlign = "center";
+
       ctx.fillText(
-        `Pressione E para interagir com ${closestDevice.name}`,
+        `Pressione E para ${device.on ? "Desligar" : "Ligar"} ${
+          closestDevice.name
+        }`,
         canvas.width / 2,
         canvas.height - 35
       );

@@ -86,19 +86,19 @@ export const devices = [
     id: "micro",
     sound: "../../assets/sounds/microwave.mp3",
   },
-  /* {
+  {
     type: "appliance",
-    power: 200,
-    x: 200,
-    y: 150,
-    room: "Sala",
+    name: "TV",
+    power: 150,
+    x: 135,
+    y: 195,
+    width: 48,
+    height: 48,
     on: false,
-    label: "TV",
-    icon: "📺",
     id: "tv",
-    soundType: "tv",
+    sound: "../../assets/sounds/tv.mp3",
   },
-
+  /*
   // Água
   {
     type: "water",
