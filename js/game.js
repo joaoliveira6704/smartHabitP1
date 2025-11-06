@@ -407,7 +407,13 @@ function render() {
           let img = new Image();
           img.src = device.on ? device.dOn : device.dOff;
 
-          ctx.drawImage(img, device.x - camera.x, device.y - camera.y, 48, 48);
+          ctx.drawImage(
+            img,
+            device.x - camera.x,
+            device.x - camera.y,
+            device.width,
+            device.height
+          );
         } else {
           if ((device.name === "TV") & device.on) {
             createTVSprite();
