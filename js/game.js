@@ -6,21 +6,21 @@ const ctx = canvas.getContext("2d");
 // Configurações do jogo
 const PRICE_PER_KWH = 0.15; // €/kWh
 const PRICE_PER_M3_WATER = 1.5; // €/m³
-let totalWaterCost = 0;
-let totalWaterLiters = 0;
-let gameTime = 0;
-let totalCost = 0,
+let totalWaterCost = 0,
+  totalWaterLiters = 0,
+  gameTime = 0,
+  totalCost = 0,
   hourlyCost = 0;
 
 // Verificar se há dispositivo próximo
 function getNearbyDevice() {
-  const interactionDistance = 100;
+  const interactionDistance = 60;
   const playerCenterX = sprite.x + sprite.frameWidth / 2;
   const playerCenterY = sprite.y + sprite.frameHeight / 2;
 
   for (let device of devices) {
     const dx = device.x - playerCenterX;
-    const dy = device.y - playerCenterY;
+    const dy = device.y - playerCenterY + device.height;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
     if (distance < interactionDistance) {
@@ -41,7 +41,7 @@ function interactWithDevice() {
   console.log(`${device.power} ${device.on ? "ligado" : "desligado"}`);
 }
 
-// Controle de teclas
+// Controlo pro teclas
 document.addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
 
@@ -73,8 +73,6 @@ const camera = {
 // Imagens
 const backgroundImg = new Image();
 const characterImg = new Image();
-let imagesLoaded = 0;
-const totalImages = 2;
 
 // Carregar mapa de colisão
 async function loadCollisionMap() {
@@ -212,21 +210,7 @@ function updateCamera() {
   camera.y = Math.max(0, Math.min(mapPixelHeight - camera.height, camera.y));
 }
 
-// Carregar imagens
-function imageLoaded() {
-  imagesLoaded++;
-}
-
-backgroundImg.onload = imageLoaded;
-backgroundImg.onerror = () => {
-  imageLoaded();
-};
 backgroundImg.src = "../assets/main/map.png";
-
-characterImg.onload = imageLoaded;
-characterImg.onerror = () => {
-  imageLoaded();
-};
 characterImg.src = "../assets/main/character.png";
 
 // Teclado
@@ -307,6 +291,15 @@ function update() {
   updateCamera();
 }
 
+//Criar fora de qualquer loop para evitar bugs no audio
+devices.forEach((device) => {
+  if (device.sound) {
+    device.audioElement = new Audio(device.sound);
+    device.audioElement.loop = true;
+    device.audioElement.volume = 0.3;
+  }
+});
+
 // Renderizar
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -324,43 +317,21 @@ function render() {
       camera.width,
       camera.height
     );
-    /* rooms.forEach((room) => {
-      ctx.fillStyle = "rgb(255 0 0 / 50%)";
+    rooms.forEach((room) => {
+      ctx.fillStyle = "rgb(0 0 0 / 75%)";
       ctx.fillRect(
         room.x - camera.x,
         room.y - camera.y,
         room.width,
         room.height
       );
-    }); */
+    });
   } else {
     ctx.fillStyle = "#ecf0f1";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Grelha (com offset da câmera)
-  /* ctx.strokeStyle = "rgba(189, 195, 199, 0.3)";
-  ctx.lineWidth = 1;
-  const startX = Math.floor(camera.x / TILE_SIZE) * TILE_SIZE;
-  const startY = Math.floor(camera.y / TILE_SIZE) * TILE_SIZE;
-  const endX = camera.x + camera.width;
-  const endY = camera.y + camera.height;
-
-  for (let i = startX; i <= endX; i += TILE_SIZE) {
-    ctx.beginPath();
-    ctx.moveTo(i - camera.x, 0);
-    ctx.lineTo(i - camera.x, canvas.height);
-    ctx.stroke();
-  }
-  for (let i = startY; i <= endY; i += TILE_SIZE) {
-    ctx.beginPath();
-    ctx.moveTo(0, i - camera.y);
-    ctx.lineTo(canvas.width, i - camera.y);
-    ctx.stroke();
-  } */
-
   // Desenhar dispositivos (com offset da câmera)
-  // In the render function, replace the device drawing section with:
   devices.forEach((device) => {
     const deviceScreenX = device.x - camera.x;
     const deviceScreenY = device.y - camera.y;
@@ -389,14 +360,47 @@ function render() {
         img.src = device.on ? device.dOn : device.dOff;
 
         ctx.drawImage(img, device.x - camera.x, device.y - camera.y, 48, 48);
-      }
 
-      /* // Label
+        if (device.audioElement) {
+          if (device.on) {
+            if (device.audioElement.paused) {
+              device.audioElement
+                .play()
+                .catch((e) => console.log("Audio play failed:", e));
+            }
+          } else {
+            if (!device.audioElement.paused) {
+              device.audioElement.pause();
+              device.audioElement.currentTime = 0;
+            }
+          }
+        }
+      }
+    }
+
+    // Mostrar label de interação
+    let closestDevice = getNearbyDevice();
+
+    if (closestDevice) {
+      let labelBgImage = new Image();
+      labelBgImage.src = "../assets/main/labelBg.png";
+      ctx.drawImage(
+        labelBgImage,
+        canvas.width / 2 - 256,
+        canvas.height - 60,
+        512,
+        49
+      );
+
+      // Texto de interação
       ctx.fillStyle = "#000";
-      ctx.font = "10px Arial";
+      ctx.font = "16px BlockBlueprint";
       ctx.textAlign = "center";
-      ctx.fillText(device.label, deviceScreenX, deviceScreenY + 30);
-      ctx.textAlign = "left"; */
+      ctx.fillText(
+        `Pressione E para interagir com ${closestDevice.name}`,
+        canvas.width / 2,
+        canvas.height - 35
+      );
     }
   });
 
@@ -404,46 +408,17 @@ function render() {
   const screenX = sprite.x - camera.x;
   const screenY = sprite.y - camera.y;
 
-  if (characterImg.complete && characterImg.naturalWidth > 0) {
-    ctx.drawImage(
-      characterImg,
-      sprite.currentFrame * sprite.frameWidth,
-      sprite.direction * sprite.frameHeight,
-      sprite.frameWidth,
-      sprite.frameHeight,
-      screenX,
-      screenY,
-      sprite.frameWidth,
-      sprite.frameHeight
-    );
-    /* console.log("Movimneto"); */
-  } else {
-    ctx.fillStyle = "#e74c3c";
-    ctx.fillRect(screenX, screenY, sprite.frameWidth, sprite.frameHeight);
-    ctx.fillStyle = "#fff";
-    ctx.font = "12px Arial";
-    ctx.fillText("PLAYER", screenX + 10, screenY + 35);
-  }
-
-  if (characterImg.complete && characterImg.naturalWidth > 0) {
-    ctx.drawImage(
-      characterImg,
-      sprite.currentFrame * sprite.frameWidth,
-      sprite.direction * sprite.frameHeight,
-      sprite.frameWidth,
-      sprite.frameHeight,
-      screenX,
-      screenY,
-      sprite.frameWidth,
-      sprite.frameHeight
-    );
-  } else {
-    ctx.fillStyle = "#e74c3c";
-    ctx.fillRect(screenX, screenY, sprite.frameWidth, sprite.frameHeight);
-    ctx.fillStyle = "#fff";
-    ctx.font = "12px Arial";
-    ctx.fillText("PLAYER", screenX + 10, screenY + 35);
-  }
+  ctx.drawImage(
+    characterImg,
+    sprite.currentFrame * sprite.frameWidth,
+    sprite.direction * sprite.frameHeight,
+    sprite.frameWidth,
+    sprite.frameHeight,
+    screenX,
+    screenY,
+    sprite.frameWidth,
+    sprite.frameHeight
+  );
 
   /* // Info de debug
   ctx.fillStyle = "#fff";

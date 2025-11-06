@@ -74,6 +74,7 @@ export const devices = [
   // Eletrodomésticos
   {
     type: "appliance",
+    name: "Micro-ondas",
     power: 150,
     x: 48,
     y: 480,
@@ -83,7 +84,7 @@ export const devices = [
     dOff: "../../assets/appliances/microwaveOff.png",
     dOn: "../../assets/appliances/microwaveOn.png",
     id: "micro",
-    soundType: "appliance",
+    sound: "../../assets/sounds/microwave.mp3",
   },
   /* {
     type: "appliance",
