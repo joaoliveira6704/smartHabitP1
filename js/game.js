@@ -327,14 +327,14 @@ function update() {
     calculateCost();
   }
 
-  /* const currentHandRaisedState = window.detectHandRaised();
+  const currentHandRaisedState = window.detectHandRaised();
 
   if (currentHandRaisedState && !lastHandRaisedState) {
     interactWithDevice();
   }
 
   lastHandRaisedState = currentHandRaisedState;
- */
+
   updateCamera();
 }
 
