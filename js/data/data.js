@@ -3,18 +3,20 @@ export const rooms = [
   {
     name: "Wc Suite",
     x: 1104,
-    y: 504,
+    y: 480,
     width: 288,
-    height: 312,
-    color: "red",
+    height: 336,
+    on: false,
+    power: 150,
   },
   {
     name: "Wc",
     x: 768,
-    y: 504,
+    y: 480,
     width: 288,
-    height: 312,
-    color: "#e3f2fd",
+    height: 336,
+    on: false,
+    power: 150,
   },
 ];
 
@@ -28,49 +30,6 @@ export const lightTypes = {
 
 // Dispositivos
 export const devices = [
-  /* // Luzes
-  {
-    type: "light",
-    lightType: "LED",
-    x: 150,
-    y: 100,
-    room: "Sala",
-    on: false,
-    label: "Luz LED",
-    id: "light1",
-  },
-  {
-    type: "light",
-    lightType: "INCANDESCENT",
-    x: 550,
-    y: 100,
-    room: "Cozinha",
-    on: false,
-    label: "Luz Inc.",
-    id: "light2",
-  },
-  {
-    type: "light",
-    lightType: "LED",
-    x: 120,
-    y: 420,
-    room: "Casa de Banho",
-    on: false,
-    label: "Luz LED",
-    id: "light3",
-  },
-  {
-    type: "light",
-    lightType: "HALOGEN",
-    x: 500,
-    y: 420,
-    room: "Quarto",
-    on: false,
-    label: "Luz Halog.",
-    sensor: true,
-    id: "light4",
-  },
- */
   // Eletrodomésticos
   {
     type: "appliance",

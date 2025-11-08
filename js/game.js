@@ -202,6 +202,14 @@ function calculateCost() {
     }
   });
 
+  rooms.forEach((room) => {
+    if (room.on) {
+      totalEnergyConsumption += room.power;
+      hourlyCost += (room.power / 100) * PRICE_PER_KWH;
+      totalCost += PRICE_PER_KWH / 60;
+    }
+  });
+
   let totalCombined = totalCost + totalWaterCost;
 
   totalCombinedLabel.innerHTML = `${parseFloat(totalCombined).toFixed(2)} €`;
@@ -481,6 +489,26 @@ function render() {
         canvas.height - 35
       );
     }
+    rooms.forEach((room) => {
+      if (
+        sprite.x + sprite.frameWidth / 2 > room.x &&
+        sprite.x + sprite.frameWidth / 2 < room.x + room.width &&
+        sprite.y + sprite.frameHeight > room.y &&
+        sprite.y + sprite.frameHeight < room.y + room.height
+      ) {
+        ctx.fillStyle = "rgb(255 244 120 / 10%)";
+        room.on = true;
+      } else {
+        ctx.fillStyle = "rgb(0 0 0 / 10%)";
+        room.on = false;
+      }
+      ctx.fillRect(
+        room.x - camera.x,
+        room.y - camera.y,
+        room.width,
+        room.height
+      );
+    });
   });
 
   // Desenhar sprite (com offset da câmera)
