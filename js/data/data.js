@@ -156,7 +156,7 @@ export const devices = [
     dOff: "../../assets/appliances/toiletOff.png",
     dOn: "../../assets/appliances/toiletOn.png",
     id: "toilet1",
-    sound: "water",
+    sound: "../../assets/sounds/flush.mp3",
   },
   {
     type: "water",
@@ -171,7 +171,7 @@ export const devices = [
     dOff: "../../assets/appliances/toiletOff.png",
     dOn: "../../assets/appliances/toiletOn.png",
     id: "toilet2",
-    sound: "water",
+    sound: "../../assets/sounds/flush.mp3",
   },
   {
     type: "water",
@@ -231,7 +231,7 @@ export const devices = [
   },
   {
     type: "water",
-    name: "Toneira",
+    name: "Sanita",
     waterFlow: 6,
     x: 180,
     y: 480,
@@ -239,6 +239,6 @@ export const devices = [
     on: false,
     label: "Autoclismo",
     id: "flush",
-    sound: "water",
+    sound: "../../assets/sounds/sink.mp3",
   },
 ];

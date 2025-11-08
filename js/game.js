@@ -24,7 +24,7 @@ function getNearbyDevice() {
   const playerCenterY = sprite.y + sprite.frameHeight / 2;
 
   for (let device of devices) {
-    if (device.name === "Micro-ondas") {
+    if (device.name === "Micro-ondas" || device.name === "TV") {
       interactionDistance = 60;
     } else {
       interactionDistance = 30;
@@ -44,6 +44,21 @@ function getNearbyDevice() {
 function interactWithDevice() {
   const device = getNearbyDevice();
   if (!device) return;
+
+  if (device.name === "Sanita") {
+    if (device.on) return;
+
+    device.on = true;
+    console.log(`${device.name} ativada`);
+
+    // Desligar após 5 segundos
+    setTimeout(() => {
+      device.on = false;
+      console.log(`${device.name} desativada`);
+    }, 6000);
+
+    return;
+  }
 
   device.on = !device.on;
 
@@ -461,7 +476,26 @@ function render() {
         }
       }
     }
-
+    rooms.forEach((room) => {
+      if (
+        sprite.x + sprite.frameWidth / 2 > room.x &&
+        sprite.x + sprite.frameWidth / 2 < room.x + room.width &&
+        sprite.y + sprite.frameHeight > room.y &&
+        sprite.y + sprite.frameHeight < room.y + room.height
+      ) {
+        ctx.fillStyle = "rgb(255 244 120 / 5%)";
+        room.on = true;
+      } else {
+        ctx.fillStyle = "rgb(0 0 0 / 10%)";
+        room.on = false;
+      }
+      ctx.fillRect(
+        room.x - camera.x,
+        room.y - camera.y,
+        room.width,
+        room.height
+      );
+    });
     // Mostrar label de interação
     let closestDevice = getNearbyDevice();
 
@@ -480,35 +514,18 @@ function render() {
       ctx.fillStyle = "#000";
       ctx.font = "16px BlockBlueprint";
       ctx.textAlign = "center";
-
-      ctx.fillText(
-        `Pressione E para ${device.on ? "Desligar" : "Ligar"} ${
-          closestDevice.name
-        }`,
-        canvas.width / 2,
-        canvas.height - 35
-      );
-    }
-    rooms.forEach((room) => {
-      if (
-        sprite.x + sprite.frameWidth / 2 > room.x &&
-        sprite.x + sprite.frameWidth / 2 < room.x + room.width &&
-        sprite.y + sprite.frameHeight > room.y &&
-        sprite.y + sprite.frameHeight < room.y + room.height
-      ) {
-        ctx.fillStyle = "rgb(255 244 120 / 10%)";
-        room.on = true;
+      let text;
+      if (closestDevice.name === "Sanita") {
+        text = `${
+          closestDevice.on ? "Autoclismo em uso..." : "Puxar o autoclismo"
+        }`;
       } else {
-        ctx.fillStyle = "rgb(0 0 0 / 10%)";
-        room.on = false;
+        text = `Pressione E para ${closestDevice.on ? "Desligar" : "Ligar"} ${
+          closestDevice.name
+        }`;
       }
-      ctx.fillRect(
-        room.x - camera.x,
-        room.y - camera.y,
-        room.width,
-        room.height
-      );
-    });
+      ctx.fillText(text, canvas.width / 2, canvas.height - 35);
+    }
   });
 
   // Desenhar sprite (com offset da câmera)
@@ -548,10 +565,6 @@ function render() {
     60
   );
   ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80); */
-  rooms.forEach((room) => {
-    ctx.fillStyle = "rgb(0 0 0 / 75%)";
-    ctx.fillRect(room.x - camera.x, room.y - camera.y, room.width, room.height);
-  });
 }
 
 // Game loop
