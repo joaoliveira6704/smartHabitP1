@@ -1,6 +1,8 @@
+@import url(./options.css);
+
 @font-face {
   font-family: "BlockBlueprint";
-  src: url("../assets/fonts/BlockBlueprint.ttf"); /*URL to font*/
+  src: url("../assets/fonts/BlockBlueprint.ttf");
 }
 
 * {
