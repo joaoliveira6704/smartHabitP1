@@ -69,7 +69,7 @@ export const devices = [
     dOff: "../../assets/appliances/ovenOff.png",
     dOn: "../../assets/appliances/ovenOn.png",
     id: "micro",
-    sound: "tv",
+    sound: "../../assets/sounds/oven.mp3",
   },
   {
     type: "appliance",
@@ -81,9 +81,9 @@ export const devices = [
     height: 96,
     on: false,
     dOff: "../../assets/appliances/stove.png",
-    dOn: "../../assets/appliances/microwaveOn.png",
+    dOn: "../../assets/appliances/stove.png",
     id: "micro",
-    sound: "tv",
+    sound: "../../assets/sounds/oven.mp3",
   },
   {
     type: "appliance",
@@ -97,7 +97,7 @@ export const devices = [
     dOff: "../../assets/appliances/fridgeOff.png",
     dOn: "../../assets/appliances/fridgeOn.png",
     id: "micro",
-    sound: "tv",
+    sound: "../../assets/sounds/fridge.mp3",
   },
   {
     type: "appliance",

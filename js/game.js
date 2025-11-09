@@ -60,6 +60,21 @@ function interactWithDevice() {
     return;
   }
 
+  if (device.name === "Micro-ondas") {
+    if (device.on) return;
+
+    device.on = true;
+    console.log(`${device.name} ativado`);
+
+    // Desligar após 9.9 segundos (duração do áudio)
+    setTimeout(() => {
+      device.on = false;
+      console.log(`${device.name} desativado`);
+    }, 9900);
+
+    return;
+  }
+
   device.on = !device.on;
 
   // Feedback visual
@@ -201,7 +216,8 @@ function checkCollision(x, y, width, height) {
 function calculateCost() {
   let totalEnergyConsumption = 0,
     totalWaterConsumption = 0,
-    hourlyCost = 0;
+    hourlyCost = 0,
+    hourlyWaterCost = 0;
 
   devices.forEach((device) => {
     if (device.on) {
@@ -212,6 +228,7 @@ function calculateCost() {
       } else {
         totalWaterConsumption += device.waterFlow;
         totalWaterCost += (device.waterFlow / 1000) * PRICE_PER_M3_WATER;
+        hourlyWaterCost += (device.waterFlow / 1000) * PRICE_PER_M3_WATER;
         totalWaterLiters += device.waterFlow / 60;
       }
     }
@@ -232,7 +249,7 @@ function calculateCost() {
   energyCost.innerHTML = `${parseFloat(hourlyCost).toFixed(2)} €`;
   energyTotalCost.innerHTML = `${parseFloat(totalCost).toFixed(2)} €`;
   waterConsumption.innerHTML = `${totalWaterConsumption} L/MIN`;
-  waterCost.innerHTML = `${parseFloat(totalWaterCost).toFixed(2)} €`;
+  waterCost.innerHTML = `${parseFloat(hourlyWaterCost).toFixed(2)} €`;
   totalWater.innerHTML = `${parseInt(totalWaterLiters)} L`;
 }
 
@@ -366,12 +383,11 @@ function update() {
   updateCamera();
 }
 
-//Criar fora de qualquer loop para evitar bugs no audio
 devices.forEach((device) => {
   if (device.sound) {
     device.audioElement = new Audio(device.sound);
     device.audioElement.loop = true;
-    device.audioElement.volume = 0.3;
+    device.audioElement.volume = 0.1;
   }
 });
 
@@ -517,7 +533,15 @@ function render() {
       let text;
       if (closestDevice.name === "Sanita") {
         text = `${
-          closestDevice.on ? "Autoclismo em uso..." : "Puxar o autoclismo"
+          closestDevice.on
+            ? "Autoclismo em Uso..."
+            : "Pressione E para Puxar o Autoclismo"
+        }`;
+      } else if (closestDevice.name === "Micro-ondas") {
+        text = `${
+          closestDevice.on
+            ? "Micro-ondas em uso..."
+            : "Pressione E para Usar o Micro-ondas"
         }`;
       } else {
         text = `Pressione E para ${closestDevice.on ? "Desligar" : "Ligar"} ${
