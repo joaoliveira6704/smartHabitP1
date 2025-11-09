@@ -86,7 +86,10 @@ playBtn.addEventListener("click", function () {
 });
 
 document.addEventListener("keydown", function (event) {
-  if (event.key.toLowerCase() === "p" && gameActive) {
+  if (
+    (event.key.toLowerCase() === "p" || event.key === "Escape") &&
+    gameActive
+  ) {
     game.classList.remove("show");
     game.style.visibility = "hidden";
     gameActive = false;
