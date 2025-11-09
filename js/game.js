@@ -389,6 +389,15 @@ devices.forEach((device) => {
     device.audioElement.loop = true;
     device.audioElement.volume = 0.1;
   }
+
+  if (device.dOn) {
+    device.imageOn = new Image();
+    device.imageOn.src = device.dOn;
+  }
+  if (device.dOff) {
+    device.imageOff = new Image();
+    device.imageOff.src = device.dOff;
+  }
 });
 
 // Renderizar
@@ -438,9 +447,8 @@ function render() {
         }
       } else {
         // Desenhar eletrodoméstico ou água
-        if (device.dOn && device.dOff) {
-          let img = new Image();
-          img.src = device.on ? device.dOn : device.dOff;
+        if (device.imageOn || device.imageOff) {
+          let img = device.on ? device.imageOn : device.imageOff;
 
           ctx.drawImage(
             img,
