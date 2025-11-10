@@ -1,4 +1,4 @@
-import { rooms, devices, lightTypes } from "./data/data.js";
+import { rooms, devices } from "./data/data.js";
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -59,7 +59,6 @@ function interactWithDevice() {
 
     return;
   }
-
   if (device.name === "Micro-ondas") {
     if (device.on) return;
 
@@ -74,7 +73,6 @@ function interactWithDevice() {
 
     return;
   }
-
   device.on = !device.on;
 
   // Feedback visual
@@ -434,56 +432,42 @@ function render() {
       deviceScreenY > -90 &&
       deviceScreenY < canvas.height + 90
     ) {
-      if (device.type === "light") {
-        // Desenhar luz
-        ctx.fillStyle = device.on ? lightTypes[device.lightType].color : "#666";
-        ctx.beginPath();
-        ctx.arc(deviceScreenX, deviceScreenY, 15, 0, Math.PI * 2);
-        ctx.fill();
-        if (device.on) {
-          ctx.strokeStyle = "rgba(255, 255, 0, 0.5)";
-          ctx.lineWidth = 3;
-          ctx.stroke();
-        }
-      } else {
-        // Desenhar eletrodoméstico ou água
-        if (device.imageOn || device.imageOff) {
-          let img = device.on ? device.imageOn : device.imageOff;
+      // Desenhar eletrodoméstico ou água
+      if (device.imageOn || device.imageOff) {
+        let img = device.on ? device.imageOn : device.imageOff;
 
-          ctx.drawImage(
-            img,
-            deviceScreenX,
-            deviceScreenY,
-            device.width,
-            device.height
-          );
-        } else {
-          if ((device.name === "TV") & device.on) {
-            createTVSprite();
-          }
+        ctx.drawImage(
+          img,
+          deviceScreenX,
+          deviceScreenY,
+          device.width,
+          device.height
+        );
+      } else {
+        if ((device.name === "TV") & device.on) {
+          createTVSprite();
         }
-        if (device.on && device.type === "water") {
-          if (device.name != "Sanita") {
-            ctx.fillStyle = "#64B5F6";
-            for (let i = 0; i < 3; i++) {
-              let dropX = deviceScreenX + device.width / 2;
-              let dropY;
-              if (device.name === "Banheira") {
-                dropY = deviceScreenY + 40 + ((gameTime * 2 + i * 10) % 22);
-              } else if (device.id === "tapKitchen") {
-                dropY = deviceScreenY + 19 + ((gameTime * 2 + i * 10) % 18);
-                dropX = deviceScreenX + device.width / 2 - 5;
-              } else {
-                dropY = deviceScreenY + 10 + ((gameTime * 2 + i * 10) % 18);
-              }
-              ctx.beginPath();
-              ctx.arc(dropX, dropY, 3, 0, Math.PI * 2);
-              ctx.fill();
+      }
+      if (device.on && device.type === "water") {
+        if (device.name != "Sanita") {
+          ctx.fillStyle = "#64B5F6";
+          for (let i = 0; i < 3; i++) {
+            let dropX = deviceScreenX + device.width / 2;
+            let dropY;
+            if (device.name === "Banheira") {
+              dropY = deviceScreenY + 40 + ((gameTime * 2 + i * 10) % 22);
+            } else if (device.id === "tapKitchen") {
+              dropY = deviceScreenY + 19 + ((gameTime * 2 + i * 10) % 18);
+              dropX = deviceScreenX + device.width / 2 - 5;
+            } else {
+              dropY = deviceScreenY + 10 + ((gameTime * 2 + i * 10) % 18);
             }
+            ctx.beginPath();
+            ctx.arc(dropX, dropY, 3, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
       }
-
       if (device.audioElement) {
         if (device.on) {
           if (device.audioElement.paused) {
@@ -505,13 +489,23 @@ function render() {
         sprite.x + sprite.frameWidth / 2 > room.x &&
         sprite.x + sprite.frameWidth / 2 < room.x + room.width &&
         sprite.y + sprite.frameHeight > room.y &&
-        sprite.y + sprite.frameHeight < room.y + room.height
+        sprite.y + sprite.frameHeight < room.y + room.height &&
+        room.interaction === "sensor"
       ) {
-        ctx.fillStyle = "rgb(255 244 120 / 5%)";
         room.on = true;
       } else {
-        ctx.fillStyle = "rgb(0 0 0 / 10%)";
-        room.on = false;
+        let device = devices.find((device) => device.room === room.name);
+        if (device && device.on) {
+          room.on = true;
+        } else {
+          room.on = false;
+        }
+      }
+
+      if (room.on) {
+        ctx.fillStyle = room.colorOn;
+      } else {
+        ctx.fillStyle = room.colorOff;
       }
       ctx.fillRect(
         room.x - camera.x,
@@ -576,7 +570,7 @@ function render() {
     sprite.frameHeight
   );
 
-  /* // Info de debug
+  // Info de debug
   ctx.fillStyle = "#fff";
   ctx.fillRect(5, 5, 250, 95);
   ctx.fillStyle = "#2c3e50";
@@ -596,7 +590,7 @@ function render() {
     10,
     60
   );
-  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80); */
+  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80);
 }
 
 // Game loop
