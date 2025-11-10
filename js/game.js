@@ -460,7 +460,7 @@ function render() {
               dropY = deviceScreenY + 19 + ((gameTime * 2 + i * 10) % 18);
               dropX = deviceScreenX + device.width / 2 - 5;
             } else {
-              dropY = deviceScreenY + 10 + ((gameTime * 2 + i * 10) % 18);
+              dropY = deviceScreenY + 10 + ((gameTime * 2 + i * 5) % 13);
             }
             ctx.beginPath();
             ctx.arc(dropX, dropY, 3, 0, Math.PI * 2);
