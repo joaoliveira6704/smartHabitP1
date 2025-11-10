@@ -459,6 +459,8 @@ function render() {
             } else if (device.id === "tapKitchen") {
               dropY = deviceScreenY + 19 + ((gameTime * 2 + i * 10) % 18);
               dropX = deviceScreenX + device.width / 2 - 5;
+            } else if (device.name === "Chuveiro") {
+              dropY = deviceScreenY + 40 + ((gameTime * 2 + i * 10) % 60);
             } else {
               dropY = deviceScreenY + 10 + ((gameTime * 2 + i * 5) % 13);
             }
@@ -570,27 +572,68 @@ function render() {
     sprite.frameHeight
   );
 
-  // Info de debug
+  // Minimap
+  const minimapImg = new Image();
+  minimapImg.src = "../assets/main/map.png";
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(440, 0, 170, 100);
+  ctx.drawImage(minimapImg, 445, 5, 150, 100);
+  ctx.fillStyle = "red";
+  ctx.fillRect(sprite.x / 9.5 + 445, sprite.y / 9 + 3, 5, 5);
+  console.log(sprite.x / 9 + 445);
   ctx.fillStyle = "#fff";
-  ctx.fillRect(5, 5, 250, 95);
-  ctx.fillStyle = "#2c3e50";
-  ctx.font = "14px Arial";
-  ctx.fillText(
-    `Pos: (${Math.round(sprite.x)}, ${Math.round(sprite.y)})`,
-    10,
-    20
+  ctx.font = "16px BlockBlueprint";
+  ctx.fillRect(
+    5,
+    5,
+    250,
+    devices.filter((device) => device.on && device.type != "light").length *
+      20 +
+      rooms.filter((room) => room.on).length * 20
   );
-  ctx.fillText(
-    `Câmera: (${Math.round(camera.x)}, ${Math.round(camera.y)})`,
-    10,
-    40
-  );
-  ctx.fillText(
-    `Direção: ${["Baixo", "Esquerda", "Direita", "Cima"][sprite.direction]}`,
-    10,
-    60
-  );
-  ctx.fillText(`Frame: ${sprite.currentFrame}`, 10, 80);
+  ctx.fillStyle = "#000000";
+  ctx.textAlign = "left";
+  let posI = 20;
+  devices
+    .filter((device) => device.on && device.type != "light")
+    .forEach((device) => {
+      ctx.fillText(
+        `${device.name} - ${device.power || device.waterFlow} ${
+          device.room
+            ? "W - " +
+              rooms
+                .find((room) => room.name === device.room)
+                .type.toLocaleUpperCase()
+            : device.power
+            ? "W"
+            : "L/H"
+        }`,
+        20,
+        posI
+      );
+
+      posI += 20;
+    });
+  rooms
+    .filter((room) => room.on)
+    .forEach((room) => {
+      ctx.fillText(
+        `Luz ${room.name} - ${room.power || room.waterFlow} ${
+          room.room
+            ? "W - " +
+              rooms
+                .find((room) => room.name === room.room)
+                .type.toLocaleUpperCase()
+            : room.power
+            ? "W"
+            : "L/H"
+        }`,
+        20,
+        posI
+      );
+
+      posI += 20;
+    });
 }
 
 // Game loop
