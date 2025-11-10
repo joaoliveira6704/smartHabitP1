@@ -16,7 +16,9 @@ function setup() {
   canvas.hide();
 }
 
+// Desenhar na câmera
 function draw() {
+  //Se houver deteção
   if (detectionActive) {
     image(video, 0, 0, width, height);
     for (let i = 0; i < hands.length; i++) {
@@ -46,7 +48,7 @@ function draw() {
         [9, 13],
         [13, 17],
       ];
-      // Draw connections
+      // Desenhar conexões entre keypoints
       stroke(255, 0, 0);
       strokeWeight(2);
       for (let j = 0; j < connections.length; j++) {
@@ -55,7 +57,7 @@ function draw() {
         let kp2 = hand.keypoints[end];
         line(kp1.x, kp1.y, kp2.x, kp2.y);
       }
-      // Draw keypoints
+      // Desenhar keypoints
       for (let j = 0; j < hand.keypoints.length; j++) {
         let keypoint = hand.keypoints[j];
         fill(0, 255, 0);
@@ -79,6 +81,8 @@ window.detectHandRaised = detectHandRaised;
 function gotHands(results) {
   hands = results;
 }
+
+// Botões para toggle
 
 const ml5CameraSwitch = document.getElementById("ml5Camera");
 const ml5ToggleSwitch = document.getElementById("ml5Model");

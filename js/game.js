@@ -1,86 +1,110 @@
 import { rooms, devices } from "./data/data.js";
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Configurações do jogo
-const PRICE_PER_KWH = 0.15; // €/kWh
-const PRICE_PER_M3_WATER = 1.5; // €/m³
-let totalWaterCost = 0,
-  totalWaterLiters = 0,
-  gameTime = 0,
-  totalCost = 0;
+// ============================================
+// VARIÁVEIS GLOBAIS DO JOGO
+// ============================================
+
+// Constantes de preços para cálculo de custos
+const PRICE_PER_KWH = 0.15; // Preço por kilowatt-hora em euros
+const PRICE_PER_M3_WATER = 1.5; // Preço por metro cúbico de água em euros
+
+// Variáveis de controlo do jogo
+let totalWaterCost = 0; // Custo total acumulado de água
+let totalWaterLiters = 0; // Litros totais de água consumidos
+let gameTime = 0; // Contador de tempo do jogo (em frames)
+let totalCost = 0; // Custo total acumulado de energia
+
+// Referências aos elementos HTML
 const waterCost = document.getElementById("waterCost");
 const waterConsumption = document.getElementById("waterConsumption");
 const energyConsumption = document.getElementById("energyConsumption");
 const energyCost = document.getElementById("energyCost");
 const energyTotalCost = document.getElementById("energyTotalCost");
 const totalCombinedLabel = document.getElementById("totalCombined");
+
+// Variável para controlar gestos (deteção de mão levantada)
 let lastHandRaisedState = false;
 
-// Verificar se há dispositivo próximo
+// ============================================
+// INTERAÇÃO COM DISPOSITIVOS
+// ============================================
+
+// Verifica se existe algum dispositivo no raio de interação
 function getNearbyDevice() {
   let interactionDistance;
+
+  // Calcular o centro do jogador
   const playerCenterX = sprite.x + sprite.frameWidth / 2;
   const playerCenterY = sprite.y + sprite.frameHeight / 2;
 
+  // Percorrer todos os dispositivos para verificar proximidade
   for (let device of devices) {
+    // Definir distância de interação baseada no tipo de dispositivo
     if (device.name === "Micro-ondas" || device.name === "TV") {
-      interactionDistance = 60;
+      interactionDistance = 60; // Dispositivos maiores têm maior alcance
     } else {
-      interactionDistance = 30;
+      interactionDistance = 30; // Distância padrão
     }
+
+    // Calcular distância euclidiana entre jogador e dispositivo
     const dx = device.x - playerCenterX + 30;
     const dy = device.y - playerCenterY + device.height;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
+    // Se o jogador estiver dentro da distância de interação
     if (distance < interactionDistance) {
       return device;
     }
   }
-  return null;
+  return null; // Nenhum dispositivo próximo
 }
 
-// Interagir com dispositivo
+/**
+ * Interage com o dispositivo mais próximo
+ * Cada dispositivo tem comportamento específico
+ */
 function interactWithDevice() {
   const device = getNearbyDevice();
-  if (!device) return;
+  if (!device) return; // Sair se não houver dispositivo próximo
 
+  // Lógica específica para a Sanita
   if (device.name === "Sanita") {
-    if (device.on) return;
+    if (device.on) return; // Já está em uso, ignorar
 
-    device.on = true;
-    console.log(`${device.name} ativada`);
+    device.on = true; // Ativar autoclismo
 
-    // Desligar após 5 segundos
+    // Desligar automaticamente após 6 segundos
     setTimeout(() => {
       device.on = false;
-      console.log(`${device.name} desativada`);
     }, 6000);
 
     return;
   }
-  if (device.name === "Micro-ondas") {
-    if (device.on) return;
 
-    device.on = true;
-    console.log(`${device.name} ativado`);
+  // Lógica específica para o Micro-ondas
+  if (device.name === "Micro-ondas") {
+    if (device.on) return; // Já está em uso, ignorar
+
+    device.on = true; // Ligar micro-ondas
 
     // Desligar após 9.9 segundos (duração do áudio)
     setTimeout(() => {
       device.on = false;
-      console.log(`${device.name} desativado`);
     }, 9900);
 
     return;
   }
-  device.on = !device.on;
 
-  // Feedback visual
-  console.log(`${device.power} ${device.on ? "ligado" : "desligado"}`);
+  // Para os restantes dispositivos, simplesmente alternar o estado (ligar/desligar)
+  device.on = !device.on;
 }
 
+// Cria animação da tv ligada
 function createTVSprite() {
-  // Criar frames coloridos para simular uma TV ligada
+  // Paletas de cores para diferentes secções da TV
   const upColors = [
     "#ffffff",
     "#f4f700",
@@ -106,83 +130,94 @@ function createTVSprite() {
     "#000000",
     "#000000",
   ];
+
+  // Desenhar colunas de cores aleatórias para criar efeito de TV ligada
   for (let i = 135; i <= 190; i++) {
+    // Secção superior
     ctx.fillStyle = upColors[Math.floor(Math.random() * upColors.length)];
     ctx.fillRect(i - camera.x, 195 - camera.y, 11, 25);
+
+    // Secção média
     ctx.fillStyle = midColors[Math.floor(Math.random() * midColors.length)];
     ctx.fillRect(i - camera.x, 215 - camera.y, 11, 4);
+
+    // Secção inferior
     ctx.fillStyle = lowColors[Math.floor(Math.random() * lowColors.length)];
     ctx.fillRect(i - camera.x, 219 - camera.y, 11, 11);
-    i += 10;
+
+    i += 10; // Saltar 10 pixels para a próxima coluna
   }
 }
 
-// Controle teclas
+// ============================================
+// EVENTOS DE TECLADO
+// ============================================
+
+// Detetar teclas premidas
 document.addEventListener("keydown", (e) => {
   keys[e.key.toLowerCase()] = true;
 
+  // Tecla 'E' para interagir com dispositivos
   if (e.key.toLowerCase() === "e") {
     interactWithDevice();
   }
 });
 
+// Detetar teclas libertadas
 document.addEventListener("keyup", (e) => {
   keys[e.key.toLowerCase()] = false;
 });
 
-// Mapa de colisão
-const TILE_SIZE = 48;
-let collisionMap = [];
-let mapWidth = 0;
-let mapHeight = 0;
-let mapPixelWidth = 0;
-let mapPixelHeight = 0;
+// ============================================
+// SISTEMA DE COLISÃO E MAPA
+// ============================================
 
-// Camera
+const TILE_SIZE = 48; // Tamanho de cada tile do mapa em píxeis
+let collisionMap = []; // Matriz que define onde há colisões (0 = livre, 1 = colisão)
+let mapWidth = 0; // Largura do mapa em tiles
+let mapHeight = 0; // Altura do mapa em tiles
+let mapPixelWidth = 0; // Largura do mapa em píxeis
+let mapPixelHeight = 0; // Altura do mapa em píxeis
+
+// Objeto que controla a visualização do mapa
 const camera = {
-  x: 0,
-  y: 0,
-  width: canvas.width,
-  height: canvas.height,
+  x: 0, // Posição X da câmera no mapa
+  y: 0, // Posição Y da câmera no mapa
+  width: canvas.width, // Largura da área visível
+  height: canvas.height, // Altura da área visível
 };
 
-// Imagens
-const backgroundImg = new Image();
-const characterImg = new Image();
+// ============================================
+// RECURSOS GRÁFICOS
+// ============================================
 
-// Carregar mapa de colisão
+const backgroundImg = new Image(); // Imagem do mapa de fundo
+const characterImg = new Image(); // Spritesheet do personagem
+
+// Carregar o mapa de colisão
 async function loadCollisionMap() {
-  try {
-    const response = await fetch("./js/data/collision.txt");
-    const text = await response.text();
-    const lines = text.trim().split("\n");
+  const response = await fetch("./js/data/collision.txt");
+  const text = await response.text();
+  const lines = text.trim().split("\n");
 
-    collisionMap = lines.map((line) =>
-      line
-        .trim()
-        .split(" ")
-        .map((char) => parseInt(char))
-    );
+  // Converter o texto em matriz numérica
+  collisionMap = lines.map((line) =>
+    line
+      .trim()
+      .split(" ")
+      .map((char) => parseInt(char))
+  );
 
-    mapHeight = collisionMap.length;
-    mapWidth = collisionMap[0]?.length || 0;
-    mapPixelWidth = mapWidth * TILE_SIZE;
-    mapPixelHeight = mapHeight * TILE_SIZE;
-  } catch (error) {
-    // Mapa padrão maior se não carregar
-    mapWidth = 60;
-    mapHeight = 40;
-    mapPixelWidth = mapWidth * TILE_SIZE;
-    mapPixelHeight = mapHeight * TILE_SIZE;
-    collisionMap = Array(mapHeight)
-      .fill(0)
-      .map(() => Array(mapWidth).fill(0));
-  }
+  // Calcular dimensões do mapa
+  mapHeight = collisionMap.length;
+  mapWidth = collisionMap[0]?.length || 0;
+  mapPixelWidth = mapWidth * TILE_SIZE;
+  mapPixelHeight = mapHeight * TILE_SIZE;
 }
 
-// Verificar colisão
+// Verificar se há colisão
 function checkCollision(x, y, width, height) {
-  // Criar hitbox menor focada nos pés do personagem
+  // Criar hitbox focada nos pés do personagem
   const hitbox = {
     x: x + width * 0.25,
     y: y + height * 0.5,
@@ -190,40 +225,46 @@ function checkCollision(x, y, width, height) {
     height: height * 0.5,
   };
 
-  // Verificar os 4 cantos da hitbox
+  // Verificar colisão nos 4 cantos da hitbox
   const points = [
-    { x: hitbox.x, y: hitbox.y },
-    { x: hitbox.x + hitbox.width, y: hitbox.y },
-    { x: hitbox.x, y: hitbox.y + hitbox.height - 1 },
-    { x: hitbox.x + hitbox.width, y: hitbox.y + hitbox.height - 1 },
+    { x: hitbox.x, y: hitbox.y }, // Canto superior esquerdo
+    { x: hitbox.x + hitbox.width, y: hitbox.y }, // Canto superior direito
+    { x: hitbox.x, y: hitbox.y + hitbox.height - 1 }, // Canto inferior esquerdo
+    { x: hitbox.x + hitbox.width, y: hitbox.y + hitbox.height - 1 }, // Canto inferior direito
   ];
 
+  // Verificar cada ponto
   for (let point of points) {
     const tileX = Math.floor(point.x / TILE_SIZE);
     const tileY = Math.floor(point.y / TILE_SIZE);
 
+    // Verificar se o tile está dentro dos limites e se é sólido
     if (tileY >= 0 && tileY < mapHeight && tileX >= 0 && tileX < mapWidth) {
       if (collisionMap[tileY][tileX] === 1) {
-        return true;
+        return true; // Colisão detetada
       }
     }
   }
-  return false;
+  return false; // Sem colisão
 }
 
+// Calcular custo dos dispositivos
 function calculateCost() {
-  let totalEnergyConsumption = 0,
-    totalWaterConsumption = 0,
-    hourlyCost = 0,
-    hourlyWaterCost = 0;
+  let totalEnergyConsumption = 0; // Consumo total de energia em Watts
+  let totalWaterConsumption = 0; // Consumo total de água em L/min
+  let hourlyCost = 0; // Custo de energia por hora
+  let hourlyWaterCost = 0; // Custo de água por hora
 
+  // Calcular consumo dos dispositivos
   devices.forEach((device) => {
     if (device.on) {
       if (device.type == "light" || device.type == "appliance") {
+        // Dispositivos elétricos
         totalEnergyConsumption += device.power;
         hourlyCost += (device.power / 100) * PRICE_PER_KWH;
         totalCost += PRICE_PER_KWH / 60;
       } else {
+        // Dispositivos de água
         totalWaterConsumption += device.waterFlow;
         totalWaterCost += (device.waterFlow / 1000) * PRICE_PER_M3_WATER;
         hourlyWaterCost += (device.waterFlow / 1000) * PRICE_PER_M3_WATER;
@@ -232,6 +273,7 @@ function calculateCost() {
     }
   });
 
+  // Calcular consumo das luzes dos quartos
   rooms.forEach((room) => {
     if (room.on) {
       totalEnergyConsumption += room.power;
@@ -240,8 +282,10 @@ function calculateCost() {
     }
   });
 
+  // Calcular custo total combinado
   let totalCombined = totalCost + totalWaterCost;
 
+  // Atualizar interface com os valores calculados
   totalCombinedLabel.innerHTML = `${parseFloat(totalCombined).toFixed(2)} €`;
   energyConsumption.innerHTML = `${totalEnergyConsumption} W`;
   energyCost.innerHTML = `${parseFloat(hourlyCost).toFixed(2)} €`;
@@ -251,24 +295,32 @@ function calculateCost() {
   totalWater.innerHTML = `${parseInt(totalWaterLiters)} L`;
 }
 
-// Configurações do sprite
-const sprite = {
-  x: 260,
-  y: 250,
-  speed: 3,
+// ============================================
+// CONFIGURAÇÃO DO SPRITE
+// ============================================
 
+const sprite = {
+  x: 260, // Posição inicial X
+  y: 250, // Posição inicial Y
+  speed: 3, // Velocidade de movimento
+
+  // Dimensões do sprite no spritesheet
   frameWidth: 64,
   frameHeight: 64,
-  framesPerRow: 4,
-  currentFrame: 0,
-  frameCounter: 0,
-  animationSpeed: 8,
+  framesPerRow: 4, // Número de frames de animação por direção
+  currentFrame: 0, // Frame atual da animação
+  frameCounter: 0, // Contador para controlar velocidade da animação
+  animationSpeed: 8, // Velocidade da animação (quanto maior, mais lenta)
 
-  direction: 0,
-  isMoving: false,
+  direction: 0, // Direção atual (0=baixo, 1=esquerda, 2=direita, 3=cima)
+  isMoving: false, // Se o personagem está em movimento
 };
 
-// Teclas
+// ============================================
+// CONTROLO DE TECLADO
+// ============================================
+
+// Objeto para guardar estado das teclas
 const keys = {
   ArrowUp: false,
   ArrowDown: false,
@@ -280,21 +332,26 @@ const keys = {
   d: false,
 };
 
-// Atualizar câmera para seguir o personagem
+//Atualizar câmera
 function updateCamera() {
-  // Centrar câmera no personagem
+  // câmera no centro do sprite
   camera.x = sprite.x + sprite.frameWidth / 2 - camera.width / 2;
   camera.y = sprite.y + sprite.frameHeight / 2 - camera.height / 2;
 
-  // Limitar câmera aos limites do mapa
+  // Limitar câmera aos limites do mapa (não mostrar área fora do mapa)
   camera.x = Math.max(0, Math.min(mapPixelWidth - camera.width, camera.x));
   camera.y = Math.max(0, Math.min(mapPixelHeight - camera.height, camera.y));
 }
 
+// Carregar recursos gráficos
 backgroundImg.src = "../assets/main/map.png";
 characterImg.src = "../assets/main/character.png";
 
-// Teclado
+// ============================================
+// EVENTOS DE TECLADO PARA MOVIMENTO
+// ============================================
+
+// Registar teclas premidas
 window.addEventListener("keydown", (e) => {
   if (keys.hasOwnProperty(e.key)) {
     keys[e.key] = true;
@@ -302,6 +359,7 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+// Registar teclas libertadas
 window.addEventListener("keyup", (e) => {
   if (keys.hasOwnProperty(e.key)) {
     keys[e.key] = false;
@@ -309,34 +367,39 @@ window.addEventListener("keyup", (e) => {
   }
 });
 
-// Atualizar
+// ============================================
+// ATUALIZAÇÃO DO JOGO
+// ============================================
 function update() {
   sprite.isMoving = false;
 
+  // Guardar posição anterior para reverter se houver colisão
   const oldX = sprite.x;
   const oldY = sprite.y;
 
+  // Processar input de movimento
   if (keys.ArrowUp || keys.w) {
     sprite.y -= sprite.speed;
-    sprite.direction = 3;
+    sprite.direction = 3; // Direção para cima
     sprite.isMoving = true;
   }
   if (keys.ArrowDown || keys.s) {
     sprite.y += sprite.speed;
-    sprite.direction = 0;
+    sprite.direction = 0; // Direção para baixo
     sprite.isMoving = true;
   }
   if (keys.ArrowLeft || keys.a) {
     sprite.x -= sprite.speed;
-    sprite.direction = 1;
+    sprite.direction = 1; // Direção para esquerda
     sprite.isMoving = true;
   }
   if (keys.ArrowRight || keys.d) {
     sprite.x += sprite.speed;
-    sprite.direction = 2;
+    sprite.direction = 2; // Direção para direita
     sprite.isMoving = true;
   }
 
+  // Verificar colisão e reverter movimento se necessário
   if (sprite.isMoving) {
     if (
       checkCollision(sprite.x, sprite.y, sprite.frameWidth, sprite.frameHeight)
@@ -346,13 +409,7 @@ function update() {
     }
   }
 
-  // Limites do mapa (não do canvas)
-  sprite.x = Math.max(0, Math.min(mapPixelWidth - sprite.frameWidth, sprite.x));
-  sprite.y = Math.max(
-    0,
-    Math.min(mapPixelHeight - sprite.frameHeight, sprite.y)
-  );
-
+  // Atualizar animação do sprite
   if (sprite.isMoving) {
     sprite.frameCounter++;
     if (sprite.frameCounter >= sprite.animationSpeed) {
@@ -360,34 +417,48 @@ function update() {
       sprite.currentFrame = (sprite.currentFrame + 1) % sprite.framesPerRow;
     }
   } else {
+    // Parado: mostrar frame inicial
     sprite.currentFrame = 0;
     sprite.frameCounter = 0;
   }
+
+  // Incrementar tempo do jogo
   gameTime += 1;
-  // Atualizar custos (a cada segundo)
   gameTime++;
+
+  // Atualizar custos a cada segundo (60 frames)
   if (gameTime % 60 === 0) {
     calculateCost();
   }
 
+  // Detetar gesto de mão levantada (se disponível)
   const currentHandRaisedState = window.detectHandRaised();
 
+  // Se a mão foi levantada (transição de false para true)
   if (currentHandRaisedState && !lastHandRaisedState) {
     interactWithDevice();
   }
 
   lastHandRaisedState = currentHandRaisedState;
 
+  // Atualizar câmera
   updateCamera();
 }
 
+// ============================================
+// PRELOAD DE DISPOSITIVOS
+// ============================================
+
+// Carregar recursos de áudio e imagens para cada dispositivo
 devices.forEach((device) => {
+  // Carregar som se existir
   if (device.sound) {
     device.audioElement = new Audio(device.sound);
-    device.audioElement.loop = true;
-    device.audioElement.volume = 0.1;
+    device.audioElement.loop = true; // Som em loop
+    device.audioElement.volume = 0.1; // Volume baixo
   }
 
+  // Pré-carregar imagens de ligado/desligado
   if (device.dOn) {
     device.imageOn = new Image();
     device.imageOn.src = device.dOn;
@@ -398,41 +469,43 @@ devices.forEach((device) => {
   }
 });
 
-// Renderizar
+// ============================================
+// RENDERIZAÇÃO
+// ============================================
+
 function render() {
+  // Limpar canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Desenhar fundo (com offset da câmera)
-  if (backgroundImg.complete) {
-    ctx.drawImage(
-      backgroundImg,
-      camera.x,
-      camera.y,
-      camera.width,
-      camera.height,
-      0,
-      0,
-      camera.width,
-      camera.height
-    );
-  } else {
-    ctx.fillStyle = "#ecf0f1";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
+  ctx.drawImage(
+    backgroundImg,
+    camera.x, // Posição X no mapa
+    camera.y, // Posição Y no mapa
+    camera.width, // Largura a recortar
+    camera.height, // Altura a recortar
+    0, // X no canvas
+    0, // Y no canvas
+    camera.width, // Largura no canvas
+    camera.height // Altura no canvas
+  );
 
-  // Desenhar dispositivos (com offset da câmera)
+  // ============================================
+  // DESENHAR DISPOSITIVOS
+  // ============================================
+
   devices.forEach((device) => {
+    // Calcular posição no ecrã (com offset da câmera)
     const deviceScreenX = device.x - camera.x;
     const deviceScreenY = device.y - camera.y;
 
-    // Só desenhar se estiver visível na tela
+    // Só desenhar se estiver no viewport, para poupar memória
     if (
       deviceScreenX > -90 &&
       deviceScreenX < canvas.width + 90 &&
       deviceScreenY > -90 &&
       deviceScreenY < canvas.height + 90
     ) {
-      // Desenhar eletrodoméstico ou água
+      // Desenhar imagem do dispositivo (ligado ou desligado)
       if (device.imageOn || device.imageOff) {
         let img = device.on ? device.imageOn : device.imageOff;
 
@@ -444,16 +517,23 @@ function render() {
           device.height
         );
       } else {
+        // Animação para TV quando ligada
         if ((device.name === "TV") & device.on) {
           createTVSprite();
         }
       }
+
+      // Animação de gotas de água para dispositivos ligados
       if (device.on && device.type === "water") {
         if (device.name != "Sanita") {
-          ctx.fillStyle = "#64B5F6";
+          ctx.fillStyle = "#64B5F6"; // Cor azul para água
+
+          // Desenhar 3 gotas animadas
           for (let i = 0; i < 3; i++) {
             let dropX = deviceScreenX + device.width / 2;
             let dropY;
+
+            // Posicionar gotas conforme o dispositivo
             if (device.name === "Banheira") {
               dropY = deviceScreenY + 40 + ((gameTime * 2 + i * 10) % 22);
             } else if (device.id === "tapKitchen") {
@@ -464,12 +544,16 @@ function render() {
             } else {
               dropY = deviceScreenY + 10 + ((gameTime * 2 + i * 5) % 13);
             }
+
+            // Desenhar gota circular
             ctx.beginPath();
             ctx.arc(dropX, dropY, 3, 0, Math.PI * 2);
             ctx.fill();
           }
         }
       }
+
+      // Controlar reprodução de áudio
       if (device.audioElement) {
         if (device.on) {
           if (device.audioElement.paused) {
@@ -481,12 +565,18 @@ function render() {
         } else {
           if (!device.audioElement.paused) {
             device.audioElement.pause();
-            device.audioElement.currentTime = 0;
+            device.audioElement.currentTime = 0; // Reiniciar áudio
           }
         }
       }
     }
+
+    // ============================================
+    // GESTÃO DE ILUMINAÇÃO DOS QUARTOS
+    // ============================================
+
     rooms.forEach((room) => {
+      // Verificar se o jogador está dentro do quarto (para sensores)
       if (
         sprite.x + sprite.frameWidth / 2 > room.x &&
         sprite.x + sprite.frameWidth / 2 < room.x + room.width &&
@@ -494,20 +584,22 @@ function render() {
         sprite.y + sprite.frameHeight < room.y + room.height &&
         room.interaction === "sensor"
       ) {
-        room.on = true;
+        room.on = true; // Ligar luz automaticamente
       } else {
+        // Verificar se há algum dispositivo ligado no quarto
         let device = devices.find((device) => device.room === room.name);
         if (device && device.on) {
-          room.on = true;
+          room.on = true; // Manter luz ligada
         } else {
-          room.on = false;
+          room.on = false; // Desligar luz
         }
       }
 
+      // Desenhar overlay de iluminação
       if (room.on) {
-        ctx.fillStyle = room.colorOn;
+        ctx.fillStyle = room.colorOn; // Cor quando ligado
       } else {
-        ctx.fillStyle = room.colorOff;
+        ctx.fillStyle = room.colorOff; // Cor quando desligado
       }
       ctx.fillRect(
         room.x - camera.x,
@@ -516,10 +608,16 @@ function render() {
         room.height
       );
     });
-    // Mostrar label de interação
+
+    // ============================================
+    // LABEL DE INTERAÇÃO
+    // ============================================
+
+    // Mostrar instrução de interação se houver dispositivo próximo
     let closestDevice = getNearbyDevice();
 
     if (closestDevice) {
+      // Desenhar fundo da label
       let labelBgImage = new Image();
       labelBgImage.src = "../assets/main/labelBg.png";
       ctx.drawImage(
@@ -530,11 +628,12 @@ function render() {
         49
       );
 
-      // Texto de interação
+      // Texto de interação personalizado por dispositivo
       ctx.fillStyle = "#000";
       ctx.font = "16px BlockBlueprint";
       ctx.textAlign = "center";
       let text;
+
       if (closestDevice.name === "Sanita") {
         text = `${
           closestDevice.on
@@ -556,14 +655,17 @@ function render() {
     }
   });
 
-  // Desenhar sprite (com offset da câmera)
+  // ============================================
+  // DESENHAR PERSONAGEM
+  // ============================================
+
   const screenX = sprite.x - camera.x;
   const screenY = sprite.y - camera.y;
 
   ctx.drawImage(
     characterImg,
-    sprite.currentFrame * sprite.frameWidth,
-    sprite.direction * sprite.frameHeight,
+    sprite.currentFrame * sprite.frameWidth, // X no spritesheet
+    sprite.direction * sprite.frameHeight, // Y no spritesheet (linha da direção)
     sprite.frameWidth,
     sprite.frameHeight,
     screenX,
@@ -572,28 +674,45 @@ function render() {
     sprite.frameHeight
   );
 
-  // Minimap
+  // ============================================
+  // MINIMAPA
+  // ============================================
+
   const minimapImg = new Image();
   minimapImg.src = "../assets/main/map.png";
+
+  // Fundo preto do minimapa
   ctx.fillStyle = "#000000";
   ctx.fillRect(440, 0, 170, 100);
+
+  // Imagem do mapa em miniatura
   ctx.drawImage(minimapImg, 445, 5, 150, 100);
+
+  // Indicador da posição do jogador
   ctx.fillStyle = "red";
   ctx.fillRect(sprite.x / 9.5 + 445, sprite.y / 9 + 3, 5, 5);
-  console.log(sprite.x / 9 + 445);
+
+  // ============================================
+  // LISTA DE DISPOSITIVOS ATIVOS
+  // ============================================
+
+  // Fundo branco para a lista
   ctx.fillStyle = "#fff";
   ctx.font = "16px BlockBlueprint";
   ctx.fillRect(
     5,
     5,
-    250,
+    270,
     devices.filter((device) => device.on && device.type != "light").length *
       20 +
       rooms.filter((room) => room.on).length * 20
   );
+
+  // Listar dispositivos ligados (exceto luzes)
   ctx.fillStyle = "#000000";
   ctx.textAlign = "left";
   let posI = 20;
+
   devices
     .filter((device) => device.on && device.type != "light")
     .forEach((device) => {
@@ -606,7 +725,7 @@ function render() {
                 .type.toLocaleUpperCase()
             : device.power
             ? "W"
-            : "L/H"
+            : "L/M"
         }`,
         20,
         posI
@@ -614,20 +733,13 @@ function render() {
 
       posI += 20;
     });
+
+  // Listar luzes dos quartos ligadas
   rooms
     .filter((room) => room.on)
     .forEach((room) => {
       ctx.fillText(
-        `Luz ${room.name} - ${room.power || room.waterFlow} ${
-          room.room
-            ? "W - " +
-              rooms
-                .find((room) => room.name === room.room)
-                .type.toLocaleUpperCase()
-            : room.power
-            ? "W"
-            : "L/H"
-        }`,
+        `Luz ${room.name} - ${room.power} W - ${room.type.toLocaleUpperCase()}`,
         20,
         posI
       );
@@ -636,14 +748,17 @@ function render() {
     });
 }
 
-// Game loop
+// ============================================
+// GAME LOOP PRINCIPAL
+// ============================================
+
 function gameLoop() {
-  update();
-  render();
-  requestAnimationFrame(gameLoop);
+  update(); // Atualizar lógica do jogo
+  render(); // Desenhar tudo no canvas
+  requestAnimationFrame(gameLoop); // Agendar próximo frame
 }
 
-// Inicializar
+// Iniciar o jogo depois de carregar o mapa de colisão
 loadCollisionMap().then(() => {
   gameLoop();
 });
