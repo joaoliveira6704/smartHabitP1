@@ -1,3 +1,4 @@
+// referência a elementos
 const playBtn = document.getElementById("playBtn");
 const instructionsBtn = document.getElementById("instructionsBtn");
 const optionsBtn = document.getElementById("optionsBtn");
@@ -15,6 +16,7 @@ const backOptionsBtn = document.getElementById("backOptions-btn");
 
 let gameActive = false;
 
+// Animação ao clicar no botão "voltar" dentro das instruções
 backInstructionsBtn.addEventListener("click", function () {
   instructionsMenu.classList.remove("show");
   instructionsMenu.classList.add("hide");
@@ -29,6 +31,7 @@ backInstructionsBtn.addEventListener("click", function () {
   }, 500);
 });
 
+// Animação ao clicar no botão "voltar" dentro das opções
 backOptionsBtn.addEventListener("click", function () {
   optionsMenu.classList.remove("show");
   optionsMenu.classList.add("hide");
@@ -43,6 +46,7 @@ backOptionsBtn.addEventListener("click", function () {
   }, 500);
 });
 
+// Animação ao entrar no menu de instruções
 instructionsBtn.addEventListener("click", function () {
   menu.classList.remove("show");
   menu.classList.add("hide");
@@ -57,6 +61,7 @@ instructionsBtn.addEventListener("click", function () {
   }, 500);
 });
 
+// Animação ao entrar no menu de opções
 optionsBtn.addEventListener("click", function () {
   menu.classList.remove("show");
   menu.classList.add("hide");
@@ -71,6 +76,7 @@ optionsBtn.addEventListener("click", function () {
   }, 500);
 });
 
+// Animação ao entrar no jogo (play)
 playBtn.addEventListener("click", function () {
   menu.classList.remove("show");
   menu.classList.add("hide");
@@ -85,6 +91,7 @@ playBtn.addEventListener("click", function () {
   }, 500);
 });
 
+// Aceder ao menu durante o jogo
 document.addEventListener("keydown", function (event) {
   if (
     (event.key.toLowerCase() === "p" || event.key === "Escape") &&
