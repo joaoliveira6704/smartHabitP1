@@ -424,7 +424,6 @@ function update() {
 
   // Incrementar tempo do jogo
   gameTime += 1;
-  gameTime++;
 
   // Atualizar custos a cada segundo (60 frames)
   if (gameTime % 60 === 0) {
